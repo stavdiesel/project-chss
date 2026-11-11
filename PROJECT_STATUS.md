@@ -31,22 +31,25 @@ MVP системы управления фитнес-студией «ЧС»: к
 4. **Фикс логина** (коммит `90b8279`) — `app/core/security.py`: схемы `["bcrypt", "sha256_crypt"]`; `requirements.txt`: `passlib[bcrypt]`, `bcrypt==4.0.1`. Причина: БД хранит bcrypt `$2b$`, код проверял только sha256_crypt → 500.
 5. **Тесты и CI** (коммит `90b8279`) — `backend/tests/test_auth.py` (login ok / bad password), `conftest.py`; `.github/workflows/ci.yml` (pytest на push/PR).
 6. **Чистка репозитория** (коммит перед `90b8279`) — `.gitignore`, вынесены из индекса `.next/` и `*.db`.
-7. **Ролевая видимость тренера** (`4299bd2`) — `deps.py`, `clients.py`, `sessions.py`, `bookings.py`: тренер видит только своих клиентов/сессии/бронирования; админ — полный доступ. Запушен на origin/main. Тестов на эту фичу пока НЕТ (handoff p0-1: QA/Security/DevOps не отмечены).
+7. **Ролевая видимость тренера** (`4299bd2` + `0b9ff20`) — `deps.py`, `clients.py`, `sessions.py`, `bookings.py`: тренер видит только своих клиентов/сессии/бронирования; админ — полный доступ. Запушен на origin/main. Тесты 7 passed (auth + 5 role-visibility), независимый reviewer passed=true. Добавлена ownership-проверка в get_client/{cid} для тренера. Осталось: booking capacity race под нагрузкой (suggestion, не блокирует MVP).
+8. **Тесты эндпоинтов (P0-2)** (`dc42891`) — покрыты sessions/bookings/subscriptions (happy path + 403/404), client validation в create_sub.
+9. **env-подход во фронтенде** (`9030cba`) — `NEXT_PUBLIC_API_URL` вместо хардкода.
+10. **Миграция Pydantic на ConfigDict** (`f40b093`) — `config.py` и `schemas.py`: class-based `Config` → `SettingsConfigDict`/`ConfigDict`. Тесты 13 passed. Запушено, автодеплой Render/Vercel.
 
 ## 4. Проверки (на 2026-11-11)
 
-- `pytest backend/tests` → **2 passed** (9 deprecation-предупреждений, не критично).
+- `pytest backend/tests` → **13 passed** (17 deprecation-предупреждений, не критично).
 - `npm run build` (frontend) → **успешно**, все 6 маршрутов.
 - Production backend `/health` → ok; `/api/v1/auth/login` (client1@chs.ru / password123) → возвращает access_token.
+- Push на origin/main выполнен (f40b093), Render/Vercel автодеплой по push.
 
 ## 5. Известные риски / что не доделано
 
-- Фронтенд захардкожен на Render-URL (`https://chs-backend-oc37.onrender.com`) вместо env — ок для MVP, но при смене бэкенда править 5 файлов. `.env.example` добавлен.
-- Нет `.env.local`-обработки в коде (используется хардкод).
+- Фронтенд использует `NEXT_PUBLIC_API_URL` (env), но нет `.env.local`-обработки в коде локально — ок.
 - В прод-БД хэши паролей — bcrypt? Логин работает, но стоит убедиться после смены пароля.
-- Деплой фикса логина: коммит запушен? Нужно подтвердить push на origin (Render/Vercel деплоятся по push).
-- Депрекейты Pydantic V2 (class-based config) — не блокируют, но стоит мигрировать на ConfigDict.
-- **Фича role-visibility (`4299bd2`) завершена циклом:** тесты 7 passed (auth + 5 role-visibility), независимый reviewer passed=true (security/logic errors none). Добавлена ownership-проверка в get_client/{cid} для тренера. Осталось: booking capacity race под нагрузкой (suggestion, не блокирует MVP).
+- Booking capacity race под нагрузкой (suggestion, не блокирует MVP).
+- Депрекейты Pydantic V2 (datetime.utcnow, class-based config мигрирован).
+- Не реализовано по брифу: уведомления (Telegram/e-mail/MAX), аналитика, расчёт зарплаты, интеграция с кассой/терминалом, перенос YCLIENTS — требуют ответов клиента (см. §7/§9 брифа).
 
 ## 6. Как запускать локально
 
@@ -72,10 +75,10 @@ npm run build
 
 ## 7. Следующие шаги (по согласованию)
 
-- Push коммитов на origin → автодеплой Render/Vercel.
-- Вернуть env-подход во фронтенде (NEXT_PUBLIC_API_URL) вместо хардкода.
-- Добавить тесты на остальные эндпоинты (расписание, абонементы, бронирования).
-- Мигрировать Pydantic-схемы на ConfigDict.
+- Проверить автодеплой Render/Vercel после f40b093 (health + login в проде).
+- Запросить у клиента ключевые вопросы (brief §9): правило списания, срок отмены, каналы уведомлений, формулы зарплаты, касса/терминалы, перенос YCLIENTS.
+- После ответов: реализовать уведомления, аналитику, зарплату, кассу.
+- Опционально: добавить тесты на остальные edge-cases, capacity race handling.
 
 ## 8. Мультиагентный цикл (ЧС)
 
