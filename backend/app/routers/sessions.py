@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import date, datetime, timedelta
 from app.core.db import get_db
-from app.core.deps import get_current_user, require_role
+from app.core.deps import get_current_user, require_role, get_trainer
 from app.models.models import Session as Sess, Schedule, ClassType, Trainer, Booking
 from app.schemas.schemas import SessionOut, SessionCreate
 
@@ -19,6 +19,12 @@ def _enrich(s, db):
 @router.get("", response_model=list[SessionOut])
 def list_sessions(date_from: date = None, date_to: date = None, db: Session = Depends(get_db), user=Depends(get_current_user)):
     q = db.query(Sess)
+    if user.role.value == "trainer":
+        trainer = get_trainer(user, db)
+        if trainer:
+            q = q.filter(Sess.trainer_id == trainer.id)
+        else:
+            q = q.filter(False)
     if date_from: q = q.filter(Sess.date >= date_from)
     if date_to: q = q.filter(Sess.date <= date_to)
     return [_enrich(s, db) for s in q.order_by(Sess.start_at).all()]

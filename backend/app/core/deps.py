@@ -5,9 +5,17 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.core.security import decode_token
-from app.models.models import User
+from app.models.models import User, Trainer
 
 security = HTTPBearer()
+
+def get_trainer(user, db: Session):
+    if user.role.value != "trainer":
+        return None
+    t = user.trainer_profile
+    if t is None:
+        t = db.query(Trainer).filter(Trainer.user_id == user.id).first()
+    return t
 
 def get_current_user(creds: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
     payload = decode_token(creds.credentials)

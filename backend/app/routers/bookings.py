@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.core.db import get_db
-from app.core.deps import get_current_user, require_role
+from app.core.deps import get_current_user, require_role, get_trainer
 from app.core.config import settings
 from app.models.models import Booking, BookingStatus, Session as Sess, Client, Subscription
 from app.schemas.schemas import BookingOut
@@ -25,6 +25,12 @@ def my_bookings(db: Session = Depends(get_db), user=Depends(get_current_user)):
 
 @router.get("/session/{sid}", response_model=list[BookingOut])
 def session_bookings(sid: str, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    s = db.query(Sess).filter(Sess.id == sid).first()
+    if not s: raise HTTPException(404)
+    if user.role.value == "trainer":
+        trainer = get_trainer(user, db)
+        if not trainer or s.trainer_id != trainer.id:
+            raise HTTPException(403)
     bs = db.query(Booking).filter(Booking.session_id == sid).all()
     out=[]
     for b in bs:
@@ -72,6 +78,11 @@ def cancel(bid: str, db: Session = Depends(get_db), user=Depends(get_current_use
 def attend(bid: str, db: Session = Depends(get_db), user=Depends(require_role("admin","trainer"))):
     b = db.query(Booking).filter(Booking.id == bid).first()
     if not b: raise HTTPException(404)
+    s = db.query(Sess).filter(Sess.id == b.session_id).first()
+    if user.role.value == "trainer":
+        trainer = get_trainer(user, db)
+        if not trainer or not s or s.trainer_id != trainer.id:
+            raise HTTPException(403)
     b.status = BookingStatus.attended
     db.commit()
     # debit subscription

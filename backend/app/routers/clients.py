@@ -1,15 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.db import get_db
-from app.core.deps import get_current_user, require_role
-from app.models.models import Client, User
+from app.core.deps import get_current_user, require_role, get_trainer
+from app.models.models import Client, User, Booking, Session as Sess
 from app.schemas.schemas import ClientOut
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
 @router.get("", response_model=list[ClientOut])
 def list_clients(db: Session = Depends(get_db), user=Depends(require_role("admin","trainer"))):
-    qs = db.query(Client).all()
+    if user.role.value == "admin":
+        qs = db.query(Client).all()
+    else:
+        trainer = get_trainer(user, db)
+        if trainer:
+            qs = (db.query(Client).join(Booking, Booking.client_id == Client.id)
+                  .join(Sess, Sess.id == Booking.session_id)
+                  .filter(Sess.trainer_id == trainer.id).distinct().all())
+        else:
+            qs = []
     out=[]
     for c in qs:
         out.append(ClientOut(id=c.id, first_name=c.first_name, last_name=c.last_name,
