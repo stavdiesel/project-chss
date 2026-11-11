@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = "https://chs-backend-oc37.onrender.com";
 export default function Admin() {
   const [clients, setClients] = useState<any[]>([]);
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function Admin() {
           </tbody>
         </table>
       </div>
-      <div className="mt-4 text-sm text-muted">Расписание и абонементы — через API /api/v1 (Swagger: http://localhost:8000/docs)</div>
+      <div className="mt-4 text-sm text-muted">Расписание и абонементы — через API /api/v1 (Swagger: https://chs-backend-oc37.onrender.com/docs)</div>
     </div>
   );
 }
