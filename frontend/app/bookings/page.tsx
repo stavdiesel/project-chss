@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-const API = "https://chs-backend-oc37.onrender.com";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://chs-backend-oc37.onrender.com";
 export default function MyBookings() {
   const [bs, setBs] = useState<any[]>([]);
   useEffect(() => {
