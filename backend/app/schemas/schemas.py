@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional, List
 from datetime import datetime, date, time
 import uuid
@@ -18,8 +18,7 @@ class UserOut(BaseModel):
     email: str
     role: str
     full_name: str
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ClientOut(BaseModel):
     id: uuid.UUID
@@ -29,16 +28,14 @@ class ClientOut(BaseModel):
     email: Optional[str]=None
     status: str
     notes: Optional[str]=None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TrainerOut(BaseModel):
     id: uuid.UUID
     first_name: str
     last_name: str
     specialization: Optional[str]=None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ClassTypeOut(BaseModel):
     id: uuid.UUID
@@ -46,8 +43,7 @@ class ClassTypeOut(BaseModel):
     duration_min: int
     price_single: float
     color: str
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SessionOut(BaseModel):
     id: uuid.UUID
@@ -61,8 +57,7 @@ class SessionOut(BaseModel):
     capacity: int
     booked_count: int = 0
     status: str
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class BookingOut(BaseModel):
     id: uuid.UUID
@@ -71,8 +66,7 @@ class BookingOut(BaseModel):
     client_name: Optional[str]=None
     status: str
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SubscriptionOut(BaseModel):
     id: uuid.UUID
@@ -85,8 +79,7 @@ class SubscriptionOut(BaseModel):
     price: float
     status: str
     remaining: int = 0
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ScheduleCreate(BaseModel):
     class_type_id: uuid.UUID
