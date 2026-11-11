@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from uuid import UUID as _UUID
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role
 from app.models.models import Subscription, Client
@@ -22,11 +23,18 @@ def my_subs(db: Session = Depends(get_db), user=Depends(get_current_user)):
 @router.get("", response_model=list[SubscriptionOut])
 def list_subs(client_id: str = None, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
     q = db.query(Subscription)
-    if client_id: q = q.filter(Subscription.client_id == client_id)
+    if client_id:
+        try:
+            cid_uid = _UUID(client_id)
+        except (ValueError, TypeError):
+            raise HTTPException(404)
+        q = q.filter(Subscription.client_id == cid_uid)
     return [_out(s) for s in q.all()]
 
 @router.post("", response_model=SubscriptionOut)
 def create_sub(body: SubscriptionCreate, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
+    client = db.query(Client).filter(Client.id == body.client_id).first()
+    if not client: raise HTTPException(404, "Client not found")
     s = Subscription(client_id=body.client_id, type=body.type, total_visits=body.total_visits,
         valid_from=body.valid_from, valid_until=body.valid_until, price=body.price)
     db.add(s); db.commit(); db.refresh(s)

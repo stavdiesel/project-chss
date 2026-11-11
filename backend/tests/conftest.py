@@ -18,7 +18,7 @@ app.dependency_overrides[get_db] = override_get_db
 Base.metadata.create_all(bind=engine)
 
 from app.core.security import hash_password
-from app.models.models import (User, Role, Client, Trainer, ClassType, Session as Sess, Booking, BookingStatus)
+from app.models.models import (User, Role, Client, Trainer, ClassType, Session as Sess, Booking, BookingStatus, Subscription)
 import uuid
 from datetime import date, datetime, timedelta
 
@@ -112,6 +112,15 @@ if not b2:
     db.add(b2)
     db.commit()
     db.refresh(b2)
+
+# subscription for c2
+sub = db.query(Subscription).filter(Subscription.client_id == c2.id).first()
+if not sub:
+    sub = Subscription(client_id=c2.id, type="package", total_visits=8, used_visits=0,
+        valid_from=date.today(), valid_until=date.today() + timedelta(days=365), price=5000, status="active")
+    db.add(sub)
+    db.commit()
+    db.refresh(sub)
 
 db.close()
 
