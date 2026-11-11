@@ -13,6 +13,7 @@ const NAV_ADMIN = [
   { href: "/analytics", label: "Аналитика" },
   { href: "/team", label: "Команда" },
   { href: "/payments", label: "Оплаты" },
+  { href: "/notifications", label: "Уведомления" },
   { href: "/settings", label: "Настройки" },
 ];
 const NAV_TRAINER = [

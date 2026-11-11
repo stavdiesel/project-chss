@@ -105,6 +105,20 @@ class ClientCreateIn(BaseModel):
     phone: Optional[str] = None
     notes: Optional[str] = None
 
+class PaymentCreateIn(BaseModel):
+    client_id: Optional[uuid.UUID] = None
+    amount: float = 0
+    purpose: str = "Разовое занятие"
+
+class PaymentStatusUpdateIn(BaseModel):
+    status: str
+    note: Optional[str] = None
+
+class NotificationCreateIn(BaseModel):
+    client_id: Optional[uuid.UUID] = None
+    channel: str = "telegram"
+    message: str
+
 class SubscriptionCreate(BaseModel):
     client_id: uuid.UUID
     type: str = "package"

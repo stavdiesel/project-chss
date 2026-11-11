@@ -113,3 +113,33 @@ class Subscription(Base):
     price = Column(Float, default=0)
     status = Column(String, default="active")
     client = relationship("Client", back_populates="subscriptions")
+
+
+class PaymentStatus(str, enum.Enum):
+    pending = "pending"; success = "success"; failed = "failed"; refunded = "refunded"
+
+class Payment(Base):
+    __tablename__ = "payments"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    client_id = Column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=True)
+    amount = Column(Float, default=0)
+    purpose = Column(String, default="Разовое занятие")
+    status = Column(Enum(PaymentStatus), default=PaymentStatus.pending)
+    status_history = Column(Text, default="[]")
+    created_at = Column(DateTime, default=__import__("datetime").datetime.utcnow)
+    updated_at = Column(DateTime, default=__import__("datetime").datetime.utcnow)
+    client = relationship("Client")
+
+class NotificationStatus(str, enum.Enum):
+    pending = "pending"; sent = "sent"; failed = "failed"; not_sent = "not_sent"
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    client_id = Column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=True)
+    channel = Column(String, default="telegram")
+    message = Column(Text, nullable=False)
+    status = Column(Enum(NotificationStatus), default=NotificationStatus.not_sent)
+    reason = Column(String, nullable=True)
+    created_at = Column(DateTime, default=__import__("datetime").datetime.utcnow)
+    client = relationship("Client")
