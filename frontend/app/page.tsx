@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API = "https://chs-backend-oc37.onrender.com";
 export default function Login() {
   const [email, setEmail] = useState("client1@chs.ru");
   const [password, setPassword] = useState("password123");
