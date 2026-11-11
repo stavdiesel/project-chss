@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.db import Base, engine
-from app.routers import auth, sessions, bookings, subscriptions, clients, refs
+from app.routers import auth, sessions, bookings, subscriptions, clients, refs, analytics
 
 Base.metadata.create_all(bind=engine)
 
@@ -14,6 +14,7 @@ app.include_router(bookings.router, prefix="/api/v1")
 app.include_router(subscriptions.router, prefix="/api/v1")
 app.include_router(clients.router, prefix="/api/v1")
 app.include_router(refs.router, prefix="/api/v1")
+app.include_router(analytics.router, prefix="/api/v1")
 
 @app.get("/health")
 def health():

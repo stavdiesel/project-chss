@@ -26,6 +26,7 @@ export default function Admin() {
         </table>
       </div>
       <div className="mt-4 text-sm text-muted">Расписание и абонементы — через API /api/v1 (Swagger: https://chs-backend-oc37.onrender.com/docs)</div>
+      <div className="mt-2"><a href="/analytics" className="text-sage underline">Аналитика →</a></div>
     </div>
   );
 }
