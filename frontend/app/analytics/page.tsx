@@ -21,15 +21,15 @@ export default function Analytics() {
   useEffect(() => { load(); }, []);
 
   const card = (label: string, value: any) => (
-    <div className="bg-white rounded-card shadow p-4">
+    <div className="bg-surface rounded-card shadow p-4">
       <div className="text-sm text-muted">{label}</div>
-      <div className="text-2xl font-semibold text-sage mt-1">{value}</div>
+      <div className="text-2xl font-semibold text-accent mt-1">{value}</div>
     </div>
   );
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-semibold text-sage mb-4">Аналитика</h1>
+      <h1 className="text-2xl font-semibold text-accent mb-4">Аналитика</h1>
       <div className="flex gap-3 mb-4 items-end">
         <div>
           <label className="text-sm text-muted">С</label>
@@ -57,10 +57,10 @@ export default function Analytics() {
         </div>
       )}
 
-      <h2 className="text-lg font-semibold text-sage mb-2">По тренерам</h2>
-      <div className="bg-white rounded-card shadow overflow-hidden mb-6">
+      <h2 className="text-lg font-semibold text-accent mb-2">По тренерам</h2>
+      <div className="bg-surface rounded-card shadow overflow-hidden mb-6">
         <table className="w-full">
-          <thead className="bg-beige"><tr><th className="p-3 text-left">Тренер</th><th className="p-3 text-left">Занятий</th><th className="p-3 text-left">Записей</th><th className="p-3 text-left">Посещено</th></tr></thead>
+          <thead className="bg-surface-2"><tr><th className="p-3 text-left">Тренер</th><th className="p-3 text-left">Занятий</th><th className="p-3 text-left">Записей</th><th className="p-3 text-left">Посещено</th></tr></thead>
           <tbody>
             {byTrainer.map(t => (
               <tr key={t.trainer_id} className="border-t border-border">
@@ -74,10 +74,10 @@ export default function Analytics() {
         </table>
       </div>
 
-      <h2 className="text-lg font-semibold text-sage mb-2">По типам занятий</h2>
-      <div className="bg-white rounded-card shadow overflow-hidden">
+      <h2 className="text-lg font-semibold text-accent mb-2">По типам занятий</h2>
+      <div className="bg-surface rounded-card shadow overflow-hidden">
         <table className="w-full">
-          <thead className="bg-beige"><tr><th className="p-3 text-left">Тип</th><th className="p-3 text-left">Занятий</th><th className="p-3 text-left">Записей</th><th className="p-3 text-left">Посещено</th><th className="p-3 text-left">Цена</th></tr></thead>
+          <thead className="bg-surface-2"><tr><th className="p-3 text-left">Тип</th><th className="p-3 text-left">Занятий</th><th className="p-3 text-left">Записей</th><th className="p-3 text-left">Посещено</th><th className="p-3 text-left">Цена</th></tr></thead>
           <tbody>
             {byClass.map(c => (
               <tr key={c.class_type_id} className="border-t border-border">

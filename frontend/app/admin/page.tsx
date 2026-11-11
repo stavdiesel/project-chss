@@ -9,10 +9,10 @@ export default function Admin() {
   }, []);
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold text-sage mb-4">Админка · Клиенты</h1>
-      <div className="bg-white rounded-card shadow overflow-hidden">
+      <h1 className="text-2xl font-semibold text-accent mb-4">Админка · Клиенты</h1>
+      <div className="bg-surface rounded-card shadow overflow-hidden">
         <table className="w-full">
-          <thead className="bg-beige"><tr><th className="p-3 text-left">Имя</th><th className="p-3 text-left">Email</th><th className="p-3 text-left">Телефон</th><th className="p-3 text-left">Статус</th></tr></thead>
+          <thead className="bg-surface-2"><tr><th className="p-3 text-left">Имя</th><th className="p-3 text-left">Email</th><th className="p-3 text-left">Телефон</th><th className="p-3 text-left">Статус</th></tr></thead>
           <tbody>
             {clients.map(c => (
               <tr key={c.id} className="border-t border-border">
@@ -26,7 +26,7 @@ export default function Admin() {
         </table>
       </div>
       <div className="mt-4 text-sm text-muted">Расписание и абонементы — через API /api/v1 (Swagger: https://chs-backend-oc37.onrender.com/docs)</div>
-      <div className="mt-2"><a href="/analytics" className="text-sage underline">Аналитика →</a></div>
+      <div className="mt-2"><a href="/analytics" className="text-accent underline">Аналитика →</a></div>
     </div>
   );
 }

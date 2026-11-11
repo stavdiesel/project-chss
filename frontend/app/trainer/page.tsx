@@ -11,10 +11,10 @@ export default function Trainer() {
   }, []);
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold text-sage mb-4">Тренер · Моё расписание</h1>
+      <h1 className="text-2xl font-semibold text-accent mb-4">Тренер · Моё расписание</h1>
       <div className="space-y-3">
         {sessions.map(s => (
-          <div key={s.id} className="bg-white rounded-card p-4 shadow">
+          <div key={s.id} className="bg-surface rounded-card p-4 shadow">
             <div className="font-mono text-sm text-muted">{new Date(s.start_at).toLocaleString("ru-RU")}</div>
             <div className="font-semibold">{s.class_type_name} · {s.booked_count}/{s.capacity}</div>
           </div>

@@ -14,10 +14,10 @@ export default function MyBookings() {
   }
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-semibold text-sage mb-4">Мои записи</h1>
+      <h1 className="text-2xl font-semibold text-accent mb-4">Мои записи</h1>
       <div className="space-y-3">
         {bs.map(b => (
-          <div key={b.id} className="bg-white rounded-card p-4 shadow flex justify-between items-center">
+          <div key={b.id} className="bg-surface rounded-card p-4 shadow flex justify-between items-center">
             <div>
               <div className="font-semibold">{b.client_name}</div>
               <div className="text-sm text-muted">Сессия: {b.session_id} · {b.status}</div>
