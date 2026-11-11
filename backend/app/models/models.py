@@ -112,6 +112,7 @@ class Subscription(Base):
     valid_until = Column(Date, nullable=False)
     price = Column(Float, default=0)
     status = Column(String, default="active")
+    history = Column(Text, default="[]")
     client = relationship("Client", back_populates="subscriptions")
 
 

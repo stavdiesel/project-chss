@@ -84,6 +84,10 @@ def cancel(bid: str, db: Session = Depends(get_db), user=Depends(get_current_use
     sub = db.query(Subscription).filter(Subscription.client_id == b.client_id, Subscription.status=="active").first()
     if sub and sub.used_visits > 0:
         sub.used_visits -= 1
+        import json
+        h = json.loads(sub.history or "[]")
+        h.append({"event": "refunded", "at": datetime.utcnow().isoformat(), "booking_id": str(b.id)})
+        sub.history = json.dumps(h)
         db.commit()
     return {"ok": True}
 
@@ -106,5 +110,9 @@ def attend(bid: str, db: Session = Depends(get_db), user=Depends(require_role("a
     sub = db.query(Subscription).filter(Subscription.client_id == b.client_id, Subscription.status=="active").first()
     if sub:
         sub.used_visits = min(sub.total_visits, sub.used_visits+1)
+        import json
+        h = json.loads(sub.history or "[]")
+        h.append({"event": "debited", "at": datetime.utcnow().isoformat(), "booking_id": str(b.id)})
+        sub.history = json.dumps(h)
         db.commit()
     return {"ok": True}
