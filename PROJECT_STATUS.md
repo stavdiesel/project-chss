@@ -35,6 +35,7 @@ MVP системы управления фитнес-студией «ЧС»: к
 8. **Тесты эндпоинтов (P0-2)** (`dc42891`) — покрыты sessions/bookings/subscriptions (happy path + 403/404), client validation в create_sub.
 9. **env-подход во фронтенде** (`9030cba`) — `NEXT_PUBLIC_API_URL` вместо хардкода.
 10. **Миграция Pydantic на ConfigDict** (`f40b093`) — `config.py` и `schemas.py`: class-based `Config` → `SettingsConfigDict`/`ConfigDict`. Тесты 13 passed. Запушено, автодеплой Render/Vercel.
+11. **Аналитика базовая** (`3d566a2`) — backend `/api/v1/analytics/{summary,by-trainer,by-class-type}` (admin only), frontend `/analytics` дашборд с фильтрами по датам. Build ok, push выполнен.
 
 ## 4. Проверки (на 2026-11-11)
 
