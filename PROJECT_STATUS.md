@@ -36,6 +36,7 @@ MVP системы управления фитнес-студией «ЧС»: к
 9. **env-подход во фронтенде** (`9030cba`) — `NEXT_PUBLIC_API_URL` вместо хардкода.
 10. **Миграция Pydantic на ConfigDict** (`f40b093`) — `config.py` и `schemas.py`: class-based `Config` → `SettingsConfigDict`/`ConfigDict`. Тесты 13 passed. Запушено, автодеплой Render/Vercel.
 11. **Аналитика базовая** (`3d566a2`) — backend `/api/v1/analytics/{summary,by-trainer,by-class-type}` (admin only), frontend `/analytics` дашборд с фильтрами по датам. Build ok, push выполнен.
+12. **Тёмная тема + оболочка приложения** (`bd5a580`) — CSS-токены (#101113/#191B1E/#22252A, акценты #19B6A3/#C34B83/#397BE5/#C85A3E), Tailwind-палитра, sidebar/topbar (desktop) + компактная навигация (mobile), login с loading/error, заглушки разделов (клиенты/команда/оплаты/настройки). Build ok, push выполнен.
 
 ## 4. Проверки (на 2026-11-11)
 
