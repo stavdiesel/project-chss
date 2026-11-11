@@ -98,6 +98,13 @@ class SessionCreate(BaseModel):
     end_at: datetime
     capacity: int = 10
 
+class ClientCreateIn(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+
 class SubscriptionCreate(BaseModel):
     client_id: uuid.UUID
     type: str = "package"

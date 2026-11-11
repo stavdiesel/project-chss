@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from uuid import UUID as _UUID
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
-from app.models.models import Client, User, Booking, Session as Sess
-from app.schemas.schemas import ClientOut
+from app.core.security import hash_password
+from app.models.models import Client, User, Booking, Session as Sess, Role
+from app.schemas.schemas import ClientOut, ClientCreateIn
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
@@ -48,3 +49,12 @@ def get_client(cid: str, db: Session = Depends(get_db), user=Depends(require_rol
         phone=c.phone if user.role.value=="admin" else None,
         email=c.email if user.role.value=="admin" else None,
         status=c.status, notes=c.notes if user.role.value=="admin" else None)
+
+
+@router.post("", response_model=ClientOut)
+def create_client(body: ClientCreateIn, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
+    u = User(email=body.email, password_hash=hash_password("password123"), role=Role.client, full_name=f"{body.first_name} {body.last_name}")
+    db.add(u); db.commit(); db.refresh(u)
+    c = Client(user_id=u.id, first_name=body.first_name, last_name=body.last_name, email=body.email, phone=body.phone, notes=body.notes, status="active")
+    db.add(c); db.commit(); db.refresh(c)
+    return ClientOut(id=c.id, first_name=c.first_name, last_name=c.last_name, phone=c.phone, email=c.email, status=c.status, notes=c.notes)
