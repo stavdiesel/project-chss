@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -11,7 +13,11 @@ def get_current_user(creds: HTTPAuthorizationCredentials = Depends(security), db
     payload = decode_token(creds.credentials)
     if not payload:
         raise HTTPException(401, "Invalid token")
-    user = db.query(User).filter(User.id == payload.get("sub")).first()
+    try:
+        user_id = UUID(payload.get("sub", ""))
+    except (ValueError, TypeError, AttributeError):
+        raise HTTPException(401, "Invalid token")
+    user = db.query(User).filter(User.id == user_id).first()
     if not user or not user.is_active:
         raise HTTPException(401, "Inactive")
     return user
