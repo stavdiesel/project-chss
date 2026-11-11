@@ -1,0 +1,34 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/trainer/layout,_N_T_/trainer/page,_N_T_/trainer"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/trainer/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 64,
+    "slots": {
+      "children": {
+        "hints": 96,
+        "slots": {
+          "children": {
+            "hints": 160,
+            "slots": null
+          }
+        }
+      }
+    }
+  },
+  "routeCache": {
+    "key": "/route-cache/APP_PAGE/579c63883238037098875b210f3c917c6f1fd949b1b36d4c2cbee197d64d7f51/$/trainer",
+    "owner": {
+      "kind": "APP_PAGE",
+      "sourceRoute": "/trainer/page"
+    },
+    "isFallback": false
+  }
+}
