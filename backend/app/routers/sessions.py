@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from uuid import UUID as _UUID
 from datetime import date, datetime, timedelta
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
@@ -38,7 +39,11 @@ def create_session(body: SessionCreate, db: Session = Depends(get_db), user=Depe
 
 @router.delete("/{sid}")
 def delete_session(sid: str, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
-    s = db.query(Sess).filter(Sess.id == sid).first()
+    try:
+        uid = _UUID(sid)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    s = db.query(Sess).filter(Sess.id == uid).first()
     if not s: raise HTTPException(404)
     db.delete(s); db.commit()
     return {"ok": True}

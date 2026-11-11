@@ -18,7 +18,7 @@
 
 ## Статус
 - [x] Superagent: задача поставлена
-- [ ] Dev
-- [ ] QA
-- [ ] Security
-- [ ] DevOps
+- [x] Dev
+- [x] QA
+- [x] Security
+- [x] DevOps

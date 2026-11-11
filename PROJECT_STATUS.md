@@ -46,7 +46,7 @@ MVP системы управления фитнес-студией «ЧС»: к
 - В прод-БД хэши паролей — bcrypt? Логин работает, но стоит убедиться после смены пароля.
 - Деплой фикса логина: коммит запушен? Нужно подтвердить push на origin (Render/Vercel деплоятся по push).
 - Депрекейты Pydantic V2 (class-based config) — не блокируют, но стоит мигрировать на ConfigDict.
-- **Новая фича role-visibility (`4299bd2`) запушена, но мультиагентный цикл не завершён: нет тестов, QA/Security/DevOps не отмечены в handoff p0-1.** Перед продвижением нужно написать минимум 2 теста (trainer видит только своё; admin видит всё) и пройти QA/Security.
+- **Фича role-visibility (`4299bd2`) завершена циклом:** тесты 7 passed (auth + 5 role-visibility), независимый reviewer passed=true (security/logic errors none). Добавлена ownership-проверка в get_client/{cid} для тренера. Осталось: booking capacity race под нагрузкой (suggestion, не блокирует MVP).
 
 ## 6. Как запускать локально
 

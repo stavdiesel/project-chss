@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from uuid import UUID as _UUID
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
 from app.models.models import Client, User, Booking, Session as Sess
@@ -29,8 +30,20 @@ def list_clients(db: Session = Depends(get_db), user=Depends(require_role("admin
 
 @router.get("/{cid}", response_model=ClientOut)
 def get_client(cid: str, db: Session = Depends(get_db), user=Depends(require_role("admin","trainer"))):
-    c = db.query(Client).filter(Client.id == cid).first()
+    try:
+        uid = _UUID(cid)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    c = db.query(Client).filter(Client.id == uid).first()
     if not c: raise HTTPException(404)
+    if user.role.value == "trainer":
+        trainer = get_trainer(user, db)
+        owned = False
+        if trainer:
+            owned = db.query(Booking).join(Sess, Sess.id == Booking.session_id).filter(
+                Booking.client_id == c.id, Sess.trainer_id == trainer.id).first() is not None
+        if not owned:
+            raise HTTPException(404)
     return ClientOut(id=c.id, first_name=c.first_name, last_name=c.last_name,
         phone=c.phone if user.role.value=="admin" else None,
         email=c.email if user.role.value=="admin" else None,

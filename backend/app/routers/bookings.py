@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from uuid import UUID as _UUID
 from datetime import datetime, timedelta
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
@@ -25,13 +26,17 @@ def my_bookings(db: Session = Depends(get_db), user=Depends(get_current_user)):
 
 @router.get("/session/{sid}", response_model=list[BookingOut])
 def session_bookings(sid: str, db: Session = Depends(get_db), user=Depends(get_current_user)):
-    s = db.query(Sess).filter(Sess.id == sid).first()
+    try:
+        sid_uid = _UUID(sid)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    s = db.query(Sess).filter(Sess.id == sid_uid).first()
     if not s: raise HTTPException(404)
     if user.role.value == "trainer":
         trainer = get_trainer(user, db)
         if not trainer or s.trainer_id != trainer.id:
             raise HTTPException(403)
-    bs = db.query(Booking).filter(Booking.session_id == sid).all()
+    bs = db.query(Booking).filter(Booking.session_id == sid_uid).all()
     out=[]
     for b in bs:
         out.append(BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at))
@@ -41,9 +46,13 @@ def session_bookings(sid: str, db: Session = Depends(get_db), user=Depends(get_c
 def book(session_id: str, db: Session = Depends(get_db), user=Depends(get_current_user)):
     client = db.query(Client).filter(Client.user_id == user.id).first()
     if not client: raise HTTPException(400, "No client profile")
-    s = db.query(Sess).filter(Sess.id == session_id).first()
+    try:
+        sid_uid = _UUID(session_id)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    s = db.query(Sess).filter(Sess.id == sid_uid).first()
     if not s: raise HTTPException(404)
-    cnt = db.query(Booking).filter(Booking.session_id == s.id, Booking.status.in_(["booked","attended"])).count()
+    cnt = db.query(Booking).filter(Booking.session_id == sid_uid, Booking.status.in_(["booked","attended"])).count()
     if cnt >= s.capacity: raise HTTPException(400, "Full")
     existing = db.query(Booking).filter(Booking.session_id == s.id, Booking.client_id == client.id, Booking.status.in_(["booked","attended"])).first()
     if existing: raise HTTPException(400, "Already booked")
@@ -53,7 +62,11 @@ def book(session_id: str, db: Session = Depends(get_db), user=Depends(get_curren
 
 @router.post("/{bid}/cancel")
 def cancel(bid: str, db: Session = Depends(get_db), user=Depends(get_current_user)):
-    b = db.query(Booking).filter(Booking.id == bid).first()
+    try:
+        bid_uid = _UUID(bid)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    b = db.query(Booking).filter(Booking.id == bid_uid).first()
     if not b: raise HTTPException(404)
     client = db.query(Client).filter(Client.user_id == user.id).first()
     is_admin = user.role.value == "admin"
@@ -76,7 +89,11 @@ def cancel(bid: str, db: Session = Depends(get_db), user=Depends(get_current_use
 
 @router.post("/{bid}/attend")
 def attend(bid: str, db: Session = Depends(get_db), user=Depends(require_role("admin","trainer"))):
-    b = db.query(Booking).filter(Booking.id == bid).first()
+    try:
+        bid_uid = _UUID(bid)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    b = db.query(Booking).filter(Booking.id == bid_uid).first()
     if not b: raise HTTPException(404)
     s = db.query(Sess).filter(Sess.id == b.session_id).first()
     if user.role.value == "trainer":
