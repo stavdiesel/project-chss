@@ -23,8 +23,9 @@ export default function MyBookingsPage() {
     load();
   };
 
-  const upcoming = bookings.filter(b => b.status === "booked");
-  const past = bookings.filter(b => b.status !== "booked");
+  const now = new Date();
+  const upcoming = bookings.filter(b => b.status === "booked" && b.session_start_at && new Date(b.session_start_at) >= now);
+  const past = bookings.filter(b => !(b.status === "booked" && b.session_start_at && new Date(b.session_start_at) >= now));
 
   const fmt = (d: string) => d ? new Date(d).toLocaleString("ru-RU") : "";
 
@@ -52,7 +53,7 @@ export default function MyBookingsPage() {
         {past.map(b => (
           <div key={b.id} className="bg-surface border border-border rounded-card p-3 text-sm">
             <div className="flex justify-between">
-              <span>{b.session_class_type_name || b.status} · {fmt(b.session_start_at)}</span>
+              <span>{b.session_class_type_name || b.status} · {fmt(b.session_start_at)}{new Date(b.session_start_at) < now ? " · прошло" : ""}</span>
               <span className="text-xs text-muted">{b.created_at?.slice(0,16)}</span>
             </div>
           </div>
