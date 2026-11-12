@@ -68,7 +68,7 @@ def book(session_id: str, db: Session = Depends(get_db), user=Depends(get_curren
     if cnt >= s.capacity: raise HTTPException(400, "Full")
     existing = db.query(Booking).filter(Booking.session_id == s.id, Booking.client_id == client.id, Booking.status.in_(["booked","attended"])).first()
     if existing: raise HTTPException(400, "Already booked")
-    b = Booking(session_id=s.id, client_id=client.id, created_by=user.id if hasattr(Booking,'created_by') else None)
+    b = Booking(session_id=s.id, client_id=client.id)
     db.add(b); db.commit(); db.refresh(b)
     return BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at, **_session_info(b,db))
 
