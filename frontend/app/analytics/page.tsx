@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import dynamic from "next/dynamic";
+const AnalyticsCharts = dynamic(() => import("./AnalyticsCharts"), { ssr: false });
 const API = process.env.NEXT_PUBLIC_API_URL || "https://chs-backend-oc37.onrender.com";
 
 export default function Analytics() {
@@ -69,35 +70,7 @@ export default function Analytics() {
         </div>
       )}
 
-      <h2 className="text-lg font-semibold text-accent mb-2">Динамика посещаемости</h2>
-      <div className="bg-surface rounded-card shadow p-4 mb-6">
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={series}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="period" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="sessions" fill="#19B6A3" name="Занятий" />
-            <Bar dataKey="bookings" fill="#397BE5" name="Записей" />
-            <Bar dataKey="attended" fill="#C34B83" name="Посещено" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <h2 className="text-lg font-semibold text-accent mb-2">Динамика выручки</h2>
-      <div className="bg-surface rounded-card shadow p-4 mb-6">
-        <ResponsiveContainer width="100%" height={240}>
-          <LineChart data={series}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="period" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="revenue" stroke="#C85A3E" name="Выручка" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <AnalyticsCharts series={series} />
 
       <h2 className="text-lg font-semibold text-accent mb-2">По тренерам</h2>
       <div className="bg-surface rounded-card shadow overflow-hidden mb-6">
