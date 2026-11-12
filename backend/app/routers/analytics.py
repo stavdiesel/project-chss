@@ -67,6 +67,31 @@ def by_trainer(date_from: Optional[date] = None, date_to: Optional[date] = None,
         })
     return out
 
+@router.get("/timeseries")
+def timeseries(date_from: Optional[date] = None, date_to: Optional[date] = None, group_by: str = "day", db: Session = Depends(get_db), user=Depends(require_role("admin"))):
+    q = db.query(Sess)
+    if date_from: q = q.filter(Sess.date >= date_from)
+    if date_to: q = q.filter(Sess.date <= date_to)
+    sessions = q.all()
+    # group
+    buckets = {}
+    for s in sessions:
+        key = s.date.strftime("%Y-%m") if group_by == "month" else str(s.date)
+        b = buckets.setdefault(key, {"period": key, "sessions": 0, "bookings": 0, "attended": 0, "revenue": 0.0})
+        b["sessions"] += 1
+        bs = db.query(Booking).filter(Booking.session_id == s.id).all()
+        b["bookings"] += len(bs)
+        att = [x for x in bs if x.status == BookingStatus.attended]
+        b["attended"] += len(att)
+        ct = db.query(ClassType).filter(ClassType.id == s.class_type_id).first() if s.class_type_id else None
+        if ct:
+            b["revenue"] += ct.price_single * len(att)
+    # sort by period
+    out = sorted(buckets.values(), key=lambda x: x["period"])
+    for o in out:
+        o["revenue"] = round(o["revenue"], 2)
+    return out
+
 @router.get("/by-class-type")
 def by_class_type(date_from: Optional[date] = None, date_to: Optional[date] = None, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
     q = db.query(Sess)

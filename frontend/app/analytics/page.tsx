@@ -1,11 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 const API = process.env.NEXT_PUBLIC_API_URL || "https://chs-backend-oc37.onrender.com";
 
 export default function Analytics() {
   const [summary, setSummary] = useState<any>(null);
   const [byTrainer, setByTrainer] = useState<any[]>([]);
   const [byClass, setByClass] = useState<any[]>([]);
+  const [series, setSeries] = useState<any[]>([]);
+  const [groupBy, setGroupBy] = useState<"day" | "month">("day");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -16,6 +19,8 @@ export default function Analytics() {
     fetch(`${API}/api/v1/analytics/summary${qs}`, { headers: h }).then(r => r.json()).then(setSummary);
     fetch(`${API}/api/v1/analytics/by-trainer${qs}`, { headers: h }).then(r => r.json()).then(setByTrainer);
     fetch(`${API}/api/v1/analytics/by-class-type${qs}`, { headers: h }).then(r => r.json()).then(setByClass);
+    const tsQs = `${qs}${qs.includes("?") ? "&" : "?"}group_by=${groupBy}`;
+    fetch(`${API}/api/v1/analytics/timeseries${tsQs}`, { headers: h }).then(r => r.json()).then(setSeries);
   };
 
   useEffect(() => { load(); }, []);
@@ -30,7 +35,7 @@ export default function Analytics() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-semibold text-accent mb-4">Аналитика</h1>
-      <div className="flex gap-3 mb-4 items-end">
+      <div className="flex gap-3 mb-4 items-end flex-wrap">
         <div>
           <label className="text-sm text-muted">С</label>
           <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="block border rounded px-2 py-1" />
@@ -38,6 +43,13 @@ export default function Analytics() {
         <div>
           <label className="text-sm text-muted">По</label>
           <input type="date" value={to} onChange={e => setTo(e.target.value)} className="block border rounded px-2 py-1" />
+        </div>
+        <div>
+          <label className="text-sm text-muted">Группировка</label>
+          <select value={groupBy} onChange={e => setGroupBy(e.target.value as any)} className="block border rounded px-2 py-1">
+            <option value="day">По дням</option>
+            <option value="month">По месяцам</option>
+          </select>
         </div>
         <button onClick={load} className="bg-sage text-white px-4 py-1.5 rounded">Применить</button>
       </div>
@@ -56,6 +68,36 @@ export default function Analytics() {
           {card("Активных абонементов", summary.subscriptions_active)}
         </div>
       )}
+
+      <h2 className="text-lg font-semibold text-accent mb-2">Динамика посещаемости</h2>
+      <div className="bg-surface rounded-card shadow p-4 mb-6">
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={series}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="period" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="sessions" fill="#19B6A3" name="Занятий" />
+            <Bar dataKey="bookings" fill="#397BE5" name="Записей" />
+            <Bar dataKey="attended" fill="#C34B83" name="Посещено" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <h2 className="text-lg font-semibold text-accent mb-2">Динамика выручки</h2>
+      <div className="bg-surface rounded-card shadow p-4 mb-6">
+        <ResponsiveContainer width="100%" height={240}>
+          <LineChart data={series}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="period" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="revenue" stroke="#C85A3E" name="Выручка" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
 
       <h2 className="text-lg font-semibold text-accent mb-2">По тренерам</h2>
       <div className="bg-surface rounded-card shadow overflow-hidden mb-6">
