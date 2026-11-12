@@ -12,9 +12,14 @@ export default function SubscriptionsPage() {
 
   const load = () => {
     const t = localStorage.getItem("token");
+    if (!t) { window.location.href = "/"; return; }
     const url = filterClient ? `${API}/api/v1/subscriptions?client_id=${filterClient}` : `${API}/api/v1/subscriptions`;
-    fetch(url, { headers: { Authorization: `Bearer ${t}` } }).then(r => r.json()).then(setSubs);
-    fetch(`${API}/api/v1/clients`, { headers: { Authorization: `Bearer ${t}` } }).then(r => r.json()).then(setClients);
+    fetch(url, { headers: { Authorization: `Bearer ${t}` } })
+      .then(r => { if (!r.ok) throw new Error("Не удалось загрузить абонементы"); return r.json(); })
+      .then(setSubs).catch(e => setMsg(e.message));
+    fetch(`${API}/api/v1/clients`, { headers: { Authorization: `Bearer ${t}` } })
+      .then(r => { if (!r.ok) throw new Error("Не удалось загрузить клиентов"); return r.json(); })
+      .then(setClients).catch(() => {});
   };
   useEffect(load, [filterClient]);
 

@@ -89,3 +89,9 @@ npm run build
 ## 8. Мультиагентный цикл (ЧС)
 
 Роли: Superagent (я) → Dev → QA → Security → DevOps. Каждая задача проходит 5-уровневую валидацию. Передача только через git + handoff-файл `docs/handoff/<task>.md`. Эскалация на владельца — через меня. После каждой крупной операции — обновить этот файл (hangout).
+
+
+## Обновление 2026-11-12
+- Аналитика: timeseries + графики (recharts, dynamic import). Работает.
+- Bookings: обогащены session info, исправлен баг created_by.
+- Render: POST /bookings возвращает 404 — требуется проверка логов Render (возможно, кэш/старый образ).
