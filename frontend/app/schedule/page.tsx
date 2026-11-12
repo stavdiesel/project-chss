@@ -62,7 +62,7 @@ export default function SchedulePage() {
           <button onClick={() => setView("day")} className={`px-3 py-1.5 text-sm ${view === "day" ? "bg-accent text-bg" : "bg-surface-2 text-muted"}`}>День</button>
           <button onClick={() => setView("week")} className={`px-3 py-1.5 text-sm ${view === "week" ? "bg-accent text-bg" : "bg-surface-2 text-muted"}`}>Неделя</button>
         </div>
-        <input type="date" value={date} onChange={e => setDate(e.target.value)} className="bg-surface-2 border border-border rounded-btn px-3 py-1.5 text-text" />
+        <input type="date" value={date} min={new Date().toISOString().slice(0,10)} onChange={e => setDate(e.target.value)} className="bg-surface-2 border border-border rounded-btn px-3 py-1.5 text-text" />
         <select value={trainer} onChange={e => setTrainer(e.target.value)} className="bg-surface-2 border border-border rounded-btn px-3 py-1.5 text-text">
           <option value="">Все тренеры</option>
           {trainers.map((tr: any) => <option key={tr.id} value={tr.id}>{tr.first_name} {tr.last_name}</option>)}
