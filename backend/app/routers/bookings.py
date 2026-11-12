@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
 from app.core.config import settings
-from app.models.models import Booking, BookingStatus, Session as Sess, Client, Subscription
+from app.models.models import Booking, BookingStatus, Session as Sess, Client, Subscription, ClassType, Trainer
 from app.schemas.schemas import BookingOut
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
@@ -14,6 +14,18 @@ def _name(b, db):
     c = db.query(Client).filter(Client.id == b.client_id).first()
     return (c.first_name+" "+c.last_name) if c else None
 
+def _session_info(b, db):
+    s = db.query(Sess).filter(Sess.id == b.session_id).first()
+    if not s: return {}
+    ct = db.query(ClassType).filter(ClassType.id == s.class_type_id).first()
+    tr = db.query(Trainer).filter(Trainer.id == s.trainer_id).first()
+    return {
+        "session_start_at": s.start_at,
+        "session_end_at": s.end_at,
+        "session_class_type_name": ct.name if ct else None,
+        "session_trainer_name": (tr.first_name+" "+tr.last_name) if tr else None,
+    }
+
 @router.get("/me", response_model=list[BookingOut])
 def my_bookings(db: Session = Depends(get_db), user=Depends(get_current_user)):
     client = db.query(Client).filter(Client.user_id == user.id).first()
@@ -21,7 +33,7 @@ def my_bookings(db: Session = Depends(get_db), user=Depends(get_current_user)):
     bs = db.query(Booking).filter(Booking.client_id == client.id).all()
     out=[]
     for b in bs:
-        out.append(BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at))
+        out.append(BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at, **_session_info(b,db)))
     return out
 
 @router.get("/session/{sid}", response_model=list[BookingOut])
@@ -39,7 +51,7 @@ def session_bookings(sid: str, db: Session = Depends(get_db), user=Depends(get_c
     bs = db.query(Booking).filter(Booking.session_id == sid_uid).all()
     out=[]
     for b in bs:
-        out.append(BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at))
+        out.append(BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at, **_session_info(b,db)))
     return out
 
 @router.post("", response_model=BookingOut)
@@ -58,7 +70,7 @@ def book(session_id: str, db: Session = Depends(get_db), user=Depends(get_curren
     if existing: raise HTTPException(400, "Already booked")
     b = Booking(session_id=s.id, client_id=client.id, created_by=user.id if hasattr(Booking,'created_by') else None)
     db.add(b); db.commit(); db.refresh(b)
-    return BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at)
+    return BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at, **_session_info(b,db))
 
 @router.post("/{bid}/cancel")
 def cancel(bid: str, db: Session = Depends(get_db), user=Depends(get_current_user)):

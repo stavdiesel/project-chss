@@ -1,15 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-const AnalyticsCharts = dynamic(() => import("./AnalyticsCharts"), { ssr: false });
 const API = process.env.NEXT_PUBLIC_API_URL || "https://chs-backend-oc37.onrender.com";
 
 export default function Analytics() {
   const [summary, setSummary] = useState<any>(null);
   const [byTrainer, setByTrainer] = useState<any[]>([]);
   const [byClass, setByClass] = useState<any[]>([]);
-  const [series, setSeries] = useState<any[]>([]);
-  const [groupBy, setGroupBy] = useState<"day" | "month">("day");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -20,8 +16,6 @@ export default function Analytics() {
     fetch(`${API}/api/v1/analytics/summary${qs}`, { headers: h }).then(r => r.json()).then(setSummary);
     fetch(`${API}/api/v1/analytics/by-trainer${qs}`, { headers: h }).then(r => r.json()).then(setByTrainer);
     fetch(`${API}/api/v1/analytics/by-class-type${qs}`, { headers: h }).then(r => r.json()).then(setByClass);
-    const tsQs = `${qs}${qs.includes("?") ? "&" : "?"}group_by=${groupBy}`;
-    fetch(`${API}/api/v1/analytics/timeseries${tsQs}`, { headers: h }).then(r => r.json()).then(setSeries);
   };
 
   useEffect(() => { load(); }, []);
@@ -36,7 +30,7 @@ export default function Analytics() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-semibold text-accent mb-4">Аналитика</h1>
-      <div className="flex gap-3 mb-4 items-end flex-wrap">
+      <div className="flex gap-3 mb-4 items-end">
         <div>
           <label className="text-sm text-muted">С</label>
           <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="block border rounded px-2 py-1" />
@@ -44,13 +38,6 @@ export default function Analytics() {
         <div>
           <label className="text-sm text-muted">По</label>
           <input type="date" value={to} onChange={e => setTo(e.target.value)} className="block border rounded px-2 py-1" />
-        </div>
-        <div>
-          <label className="text-sm text-muted">Группировка</label>
-          <select value={groupBy} onChange={e => setGroupBy(e.target.value as any)} className="block border rounded px-2 py-1">
-            <option value="day">По дням</option>
-            <option value="month">По месяцам</option>
-          </select>
         </div>
         <button onClick={load} className="bg-sage text-white px-4 py-1.5 rounded">Применить</button>
       </div>
@@ -69,8 +56,6 @@ export default function Analytics() {
           {card("Активных абонементов", summary.subscriptions_active)}
         </div>
       )}
-
-      <AnalyticsCharts series={series} />
 
       <h2 className="text-lg font-semibold text-accent mb-2">По тренерам</h2>
       <div className="bg-surface rounded-card shadow overflow-hidden mb-6">

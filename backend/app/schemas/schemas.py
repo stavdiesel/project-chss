@@ -66,6 +66,10 @@ class BookingOut(BaseModel):
     client_name: Optional[str]=None
     status: str
     created_at: datetime
+    session_start_at: Optional[datetime]=None
+    session_end_at: Optional[datetime]=None
+    session_class_type_name: Optional[str]=None
+    session_trainer_name: Optional[str]=None
     model_config = ConfigDict(from_attributes=True)
 
 class SubscriptionOut(BaseModel):
