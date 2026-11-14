@@ -8,10 +8,17 @@ Base.metadata.create_all(bind=engine)
 # migrate: add segment column if missing
 try:
     with engine.connect() as conn:
-        conn.execute(__import__("sqlalchemy").text("ALTER TABLE clients ADD COLUMN IF NOT EXISTS segment VARCHAR DEFAULT 'new'"))
+        conn.execute(__import__("sqlalchemy").text("ALTER TABLE clients ADD COLUMN segment VARCHAR DEFAULT 'new'"))
         conn.commit()
 except Exception as e:
     print("migrate segment:", e)
+# migrate: add frozen_until column if missing
+try:
+    with engine.connect() as conn:
+        conn.execute(__import__("sqlalchemy").text("ALTER TABLE subscriptions ADD COLUMN frozen_until DATE"))
+        conn.commit()
+except Exception as e:
+    print("migrate frozen_until:", e)
 db = SessionLocal()
 
 def get_or_create_user(email, role, name, pw="password123"):
