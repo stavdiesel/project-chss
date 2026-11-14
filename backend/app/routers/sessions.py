@@ -4,7 +4,7 @@ from uuid import UUID as _UUID
 from datetime import date, datetime, timedelta
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
-from app.models.models import Session as Sess, Schedule, ClassType, Trainer, Booking
+from app.models.models import Session as Sess, Schedule, ClassType, Trainer, Booking, Notification, NotificationStatus
 from app.schemas.schemas import SessionOut, SessionCreate
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -37,6 +37,23 @@ def create_session(body: SessionCreate, db: Session = Depends(get_db), user=Depe
     db.add(s); db.commit(); db.refresh(s)
     return _enrich(s, db)
 
+@router.patch("/{sid}/cancel")
+def cancel_session(sid: str, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
+    try:
+        uid = _UUID(sid)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    s = db.query(Sess).filter(Sess.id == uid).first()
+    if not s: raise HTTPException(404)
+    s.status = "cancelled"
+    db.commit()
+    # notify booked clients
+    bs = db.query(Booking).filter(Booking.session_id == uid, Booking.status.in_(["booked","attended"])).all()
+    for b in bs:
+        n = Notification(client_id=b.client_id, channel="telegram", message=f"Занятие {s.class_type_name or 'занятие'} {s.start_at.strftime('%d.%m %H:%M')} отменено", status=NotificationStatus.not_sent, reason="Канал не подключён (демо)")
+        db.add(n)
+    db.commit()
+    return {"ok": True, "notified": len(bs)}
 @router.delete("/{sid}")
 def delete_session(sid: str, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
     try:

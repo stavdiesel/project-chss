@@ -13,6 +13,7 @@ export default function SchedulePage() {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [myBookings, setMyBookings] = useState<any[]>([]);
+  const [role, setRole] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -37,6 +38,7 @@ export default function SchedulePage() {
   };
 
   useEffect(() => {
+    setRole(localStorage.getItem("role") || "");
     const t = localStorage.getItem("token");
     const h = { Authorization: `Bearer ${t}` };
     fetch(`${API}/api/v1/trainers`, { headers: h }).then(r => r.json()).then(setTrainers);
@@ -82,18 +84,28 @@ export default function SchedulePage() {
               <div className="font-semibold">{s.class_type_name}</div>
               <div className="text-sm text-muted">{s.trainer_name} · {s.booked_count}/{s.capacity} мест</div>
             </div>
-            {(() => {
-              const booked = myBookings.some(b => b.session_id === s.id && b.status === "booked");
-              const full = s.booked_count >= s.capacity;
-              if (booked) return <button disabled className="bg-surface-2 text-muted px-4 py-2 rounded-btn text-sm font-medium">Вы записаны</button>;
-              if (full) return <button onClick={async () => {
-                const t = localStorage.getItem("token");
-                const r = await fetch(`${API}/api/v1/waitlist`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` }, body: JSON.stringify({ session_id: s.id }) });
-                setMsg(r.ok ? "Добавлено в лист ожидания" : "Ошибка (возможно, уже в списке)");
-                load();
-              }} className="bg-warn/20 text-warn px-4 py-2 rounded-btn text-sm font-medium">В лист ожидания</button>;
-              return <button onClick={() => book(s.id)} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">Записаться</button>;
-            })()}
+            <div className="flex gap-2">
+              {role === "admin" && (
+                <button onClick={async () => {
+                  const t = localStorage.getItem("token");
+                  const r = await fetch(`${API}/api/v1/sessions/${s.id}/cancel`, { method: "PATCH", headers: { Authorization: `Bearer ${t}` } });
+                  if (r.ok) { setMsg("Занятие отменено, уведомления созданы"); load(); }
+                  else { setMsg("Ошибка отмены"); }
+                }} className="bg-danger/20 text-danger px-3 py-1 rounded-btn text-sm">Отменить</button>
+              )}
+              {(() => {
+                const booked = myBookings.some(b => b.session_id === s.id && b.status === "booked");
+                const full = s.booked_count >= s.capacity;
+                if (booked) return <button disabled className="bg-surface-2 text-muted px-4 py-2 rounded-btn text-sm font-medium">Вы записаны</button>;
+                if (full) return <button onClick={async () => {
+                  const t = localStorage.getItem("token");
+                  const r = await fetch(`${API}/api/v1/waitlist`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` }, body: JSON.stringify({ session_id: s.id }) });
+                  setMsg(r.ok ? "Добавлено в лист ожидания" : "Ошибка (возможно, уже в списке)");
+                  load();
+                }} className="bg-warn/20 text-warn px-4 py-2 rounded-btn text-sm font-medium">В лист ожидания</button>;
+                return <button onClick={() => book(s.id)} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">Записаться</button>;
+              })()}
+            </div>
           </div>
         ))}
         {!loading && sessions.length === 0 && <div className="text-muted text-sm">Нет занятий по выбранным фильтрам.</div>}
