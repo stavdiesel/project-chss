@@ -121,12 +121,21 @@ export default function SchedulePage() {
               </div>
               <div className="flex gap-2">
                 {role === "admin" && (
-                  <button onClick={async () => {
-                    const t = localStorage.getItem("token");
-                    const r = await fetch(`${API}/api/v1/sessions/${s.id}/cancel`, { method: "PATCH", headers: { Authorization: `Bearer ${t}` } });
-                    if (r.ok) { setMsg("Занятие отменено, уведомления созданы"); load(); }
-                    else { setMsg("Ошибка отмены"); }
-                  }} className="bg-danger/20 text-danger px-3 py-1 rounded-btn text-sm">Отменить</button>
+                  <div className="flex gap-1">
+                    <button onClick={async () => {
+                      const t = localStorage.getItem("token");
+                      const r = await fetch(`${API}/api/v1/sessions/${s.id}/cancel`, { method: "PATCH", headers: { Authorization: `Bearer ${t}` } });
+                      if (r.ok) { setMsg("Занятие отменено, уведомления созданы"); load(); }
+                      else { setMsg("Ошибка отмены"); }
+                    }} className="bg-danger/20 text-danger px-3 py-1 rounded-btn text-sm">Отменить</button>
+                    <button onClick={async () => {
+                      if (!confirm("Удалить занятие?")) return;
+                      const t = localStorage.getItem("token");
+                      const r = await fetch(`${API}/api/v1/sessions/${s.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${t}` } });
+                      if (r.ok) { setMsg("Занятие удалено"); load(); }
+                      else { setMsg("Ошибка удаления (возможно, есть записи)"); }
+                    }} className="bg-danger/20 text-danger px-3 py-1 rounded-btn text-sm">Удалить</button>
+                  </div>
                 )}
                 {(() => {
                   const booked = myBookings.some(b => b.session_id === s.id && b.status === "booked");
