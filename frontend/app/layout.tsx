@@ -8,6 +8,7 @@ const NAV_ADMIN = [
   { href: "/admin", label: "Дашборд" },
   { href: "/schedule", label: "Расписание" },
   { href: "/clients", label: "Клиенты" },
+  { href: "/leads", label: "Лиды" },
   { href: "/subscriptions", label: "Абонементы" },
   { href: "/bookings", label: "Записи" },
   { href: "/analytics", label: "Аналитика" },

@@ -124,6 +124,34 @@ class NotificationCreateIn(BaseModel):
     channel: str = "telegram"
     message: str
 
+class LeadOut(BaseModel):
+    id: uuid.UUID
+    first_name: str
+    last_name: Optional[str]=None
+    phone: Optional[str]=None
+    email: Optional[str]=None
+    source: Optional[str]=None
+    interest: Optional[str]=None
+    stage: str
+    responsible_id: Optional[uuid.UUID]=None
+    next_step: Optional[str]=None
+    notes: Optional[str]=None
+    client_id: Optional[uuid.UUID]=None
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class LeadCreateIn(BaseModel):
+    first_name: str
+    last_name: Optional[str]=None
+    phone: Optional[str]=None
+    email: Optional[str]=None
+    source: Optional[str]=None
+    interest: Optional[str]=None
+    stage: str = "new"
+    responsible_id: Optional[uuid.UUID]=None
+    next_step: Optional[str]=None
+    notes: Optional[str]=None
+
 class SubscriptionCreate(BaseModel):
     client_id: uuid.UUID
     type: str = "package"

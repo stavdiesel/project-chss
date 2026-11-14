@@ -1,4 +1,5 @@
 import uuid
+import datetime
 from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Enum, Boolean, Text, Date, Time
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -37,6 +38,25 @@ class Client(Base):
     user = relationship("User", back_populates="client_profile")
     subscriptions = relationship("Subscription", back_populates="client")
     bookings = relationship("Booking", back_populates="client")
+
+class Lead(Base):
+    __tablename__ = "leads"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    source = Column(String, nullable=True)
+    interest = Column(String, nullable=True)
+    stage = Column(String, default="new")
+    responsible_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    next_step = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
+    client_id = Column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow)
+    responsible = relationship("User")
+    client = relationship("Client")
 
 class Trainer(Base):
     __tablename__ = "trainers"
