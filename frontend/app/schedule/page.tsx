@@ -80,10 +80,11 @@ export default function SchedulePage() {
           <div className="grid grid-cols-7 gap-2">
             {(() => {
               const mon = new Date(date); mon.setDate(mon.getDate() - mon.getDay() + 1);
+              const today = new Date().toISOString().slice(0,10);
               const days = Array.from({length:7}, (_,i) => {
                 const d = new Date(mon); d.setDate(mon.getDate()+i);
                 return d.toISOString().slice(0,10);
-              });
+              }).filter(d => d >= today);
               return days.map(day => (
                 <div key={day} className="bg-surface border border-border rounded-card p-2 min-h-[120px]">
                   <div className="text-xs font-semibold text-accent mb-2">{day}</div>
