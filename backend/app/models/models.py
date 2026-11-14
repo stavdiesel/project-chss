@@ -84,6 +84,11 @@ class Waitlist(Base):
     session = relationship("Session")
     client = relationship("Client")
 
+class Setting(Base):
+    __tablename__ = "settings"
+    key = Column(String, primary_key=True)
+    value = Column(String, nullable=True)
+
 class Trainer(Base):
     __tablename__ = "trainers"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

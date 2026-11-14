@@ -5,7 +5,7 @@ from datetime import datetime
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
 from app.core.security import hash_password
-from app.models.models import Client, User, Booking, Session as Sess, Role, Subscription
+from app.models.models import Client, User, Booking, Session as Sess, Role, Subscription, Setting
 from app.schemas.schemas import ClientOut, ClientCreateIn
 
 router = APIRouter(prefix="/clients", tags=["clients"])
@@ -55,23 +55,29 @@ def get_client(cid: str, db: Session = Depends(get_db), user=Depends(require_rol
 @router.post("/auto-segment", response_model=dict)
 def auto_segment(db: Session = Depends(get_db), user=Depends(require_role("admin"))):
     from datetime import date, timedelta
+    # read thresholds
+    def get_setting(key, default):
+        s = db.query(Setting).filter(Setting.key == key).first()
+        return int(s.value) if s and s.value else default
+    at_risk_days = get_setting("segment_at_risk_days", 14)
+    sleeping_days = get_setting("segment_sleeping_days", 30)
+    expiring_days = get_setting("segment_expiring_days", 7)
     clients = db.query(Client).all()
     updated = 0
     for c in clients:
-        # last attended booking
         last_attended = db.query(Booking).filter(Booking.client_id == c.id, Booking.status == "attended").order_by(Booking.created_at.desc()).first()
         last_visit = last_attended.created_at if last_attended else None
         active_sub = db.query(Subscription).filter(Subscription.client_id == c.id, Subscription.status == "active").first()
         if not active_sub:
             seg = "new"
         else:
-            if active_sub.valid_until and (active_sub.valid_until - date.today()).days <= 7:
+            if active_sub.valid_until and (active_sub.valid_until - date.today()).days <= expiring_days:
                 seg = "expiring"
             elif active_sub.used_visits <= 2:
                 seg = "newcomer"
-            elif last_visit and (datetime.utcnow() - last_visit).days > 30:
+            elif last_visit and (datetime.utcnow() - last_visit).days > sleeping_days:
                 seg = "sleeping"
-            elif last_visit and (datetime.utcnow() - last_visit).days > 14:
+            elif last_visit and (datetime.utcnow() - last_visit).days > at_risk_days:
                 seg = "at_risk"
             else:
                 seg = "active"

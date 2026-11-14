@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://chs-backend-oc37.onrender.com";
 
 const DEFAULTS = {
   cancel_deadline_hours: "3",
@@ -7,6 +8,9 @@ const DEFAULTS = {
   salary_formula: "требует настройки",
   payment_provider: "не подключён",
   notification_channels: "telegram, email (не подключены)",
+  segment_at_risk_days: "14",
+  segment_sleeping_days: "30",
+  segment_expiring_days: "7",
 };
 
 export default function SettingsPage() {
@@ -18,9 +22,13 @@ export default function SettingsPage() {
     if (saved) setVals({ ...DEFAULTS, ...JSON.parse(saved) });
   }, []);
 
-  const save = () => {
+  const save = async () => {
     localStorage.setItem("chs_settings", JSON.stringify(vals));
-    setMsg("Сохранено локально (демо). Правила требуют согласования с владельцем студии.");
+    const t = localStorage.getItem("token");
+    for (const key of ["segment_at_risk_days", "segment_sleeping_days", "segment_expiring_days"]) {
+      await fetch(`${API}/api/v1/settings/${key}`, { method: "PUT", headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: `Bearer ${t}` }, body: `value=${vals[key]}` });
+    }
+    setMsg("Сохранено. Правила требуют согласования с владельцем студии.");
   };
 
   const field = (key: keyof typeof DEFAULTS, label: string, hint: string) => (
@@ -42,6 +50,9 @@ export default function SettingsPage() {
         {field("salary_formula", "Формула зарплаты тренеров", "ставка/процент/правила — требует настройки.")}
         {field("payment_provider", "Платёжный провайдер", "не подключён — требует настройки.")}
         {field("notification_channels", "Каналы уведомлений", "MAX/Telegram/email — требуют подтверждённой интеграции.")}
+        {field("segment_at_risk_days", "Сегмент «зона потери» (дней без посещения)", "Порог для at_risk.")}
+        {field("segment_sleeping_days", "Сегмент «спящий» (дней без посещения)", "Порог для sleeping.")}
+        {field("segment_expiring_days", "Сегмент «заканчивается» (дней до конца абонемента)", "Порог для expiring.")}
         <button onClick={save} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">Сохранить</button>
       </div>
     </div>
