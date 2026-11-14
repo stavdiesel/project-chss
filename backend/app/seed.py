@@ -12,6 +12,13 @@ try:
         conn.commit()
 except Exception as e:
     print("migrate segment:", e)
+# migrate: make sessions.trainer_id nullable
+try:
+    with engine.connect() as conn:
+        conn.execute(__import__("sqlalchemy").text("ALTER TABLE sessions ALTER COLUMN trainer_id DROP NOT NULL"))
+        conn.commit()
+except Exception as e:
+    print("migrate sessions.trainer_id:", e)
 # migrate: add frozen_until column if missing
 try:
     with engine.connect() as conn:
