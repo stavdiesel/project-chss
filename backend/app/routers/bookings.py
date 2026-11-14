@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
 from app.core.config import settings
-from app.models.models import Booking, BookingStatus, Session as Sess, Client, Subscription, Waitlist, ClassType, Trainer
+from app.models.models import Booking, BookingStatus, Session as Sess, Client, Subscription, Waitlist, ClassType, Trainer, Notification, NotificationStatus
 from app.schemas.schemas import BookingOut
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
@@ -70,6 +70,9 @@ def book(session_id: str, db: Session = Depends(get_db), user=Depends(get_curren
     if existing: raise HTTPException(400, "Already booked")
     b = Booking(session_id=s.id, client_id=client.id)
     db.add(b); db.commit(); db.refresh(b)
+    # notification
+    n = Notification(client_id=client.id, channel="telegram", message=f"Вы записаны на {s.class_type_name or 'занятие'} {s.start_at.strftime('%d.%m %H:%M')}", status=NotificationStatus.not_sent, reason="Канал не подключён (демо)")
+    db.add(n); db.commit()
     return BookingOut(id=b.id, session_id=b.session_id, client_id=b.client_id, client_name=_name(b,db), status=b.status.value, created_at=b.created_at)
 
 @router.post("/{bid}/cancel")
@@ -92,6 +95,9 @@ def cancel(bid: str, db: Session = Depends(get_db), user=Depends(get_current_use
     b.status = BookingStatus.cancelled_by_admin if is_admin else BookingStatus.cancelled_by_client
     b.cancelled_at = datetime.utcnow()
     db.commit()
+    # notification
+    n = Notification(client_id=b.client_id, channel="telegram", message=f"Запись на занятие отменена", status=NotificationStatus.not_sent, reason="Канал не подключён (демо)")
+    db.add(n); db.commit()
     # offer waitlist spot
     w = db.query(Waitlist).filter(Waitlist.session_id == b.session_id, Waitlist.status == "waiting").order_by(Waitlist.position).first()
     if w:
