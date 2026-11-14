@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru"><body>
       <div className="min-h-screen flex">
         <aside className="sidebar w-60 shrink-0 border-r border-border bg-surface hidden md:flex flex-col">
-          <div className="p-5 text-xl font-semibold text-accent">ЧС · Студия</div>
+          <div className="p-5 text-xl font-semibold text-accent">ЧСС · Студия</div>
           <nav className="flex-1 px-3 space-y-1">
             {nav.map(n => (
               <Link key={n.href} href={n.href} className={`block px-3 py-2 rounded-btn text-sm ${pathname===n.href ? "bg-surface-2 text-accent" : "text-muted hover:text-text hover:bg-surface-2"}`}>{n.label}</Link>
@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </aside>
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 border-b border-border bg-surface flex items-center px-4 md:px-6">
-            <div className="md:hidden text-accent font-semibold mr-3">ЧС</div>
+            <div className="md:hidden text-accent font-semibold mr-3">ЧСС</div>
             <div className="text-sm text-muted truncate">{pathname}</div>
             <div className="ml-auto text-xs text-muted">{role}</div>
           </header>
