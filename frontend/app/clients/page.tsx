@@ -45,6 +45,11 @@ export default function ClientsPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold text-accent">Клиенты</h1>
         <button onClick={() => setShowCreate(true)} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">+ Создать</button>
+        <button onClick={async () => {
+          const t = localStorage.getItem("token");
+          const r = await fetch(`${API}/api/v1/clients/auto-segment`, { method: "POST", headers: { Authorization: `Bearer ${t}` } });
+          if (r.ok) { const d = await r.json(); setMsg(`Пересчитано: ${d.updated} из ${d.total}`); load(); }
+        }} className="bg-surface-2 text-text px-4 py-2 rounded-btn text-sm">Пересчитать сегменты</button>
       </div>
       {msg && <div className="mb-3 text-success text-sm">{msg}</div>}
       <div className="flex flex-wrap gap-3 mb-4">

@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID as _UUID
+from datetime import datetime
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
 from app.core.security import hash_password
-from app.models.models import Client, User, Booking, Session as Sess, Role
+from app.models.models import Client, User, Booking, Session as Sess, Role, Subscription
 from app.schemas.schemas import ClientOut, ClientCreateIn
 
 router = APIRouter(prefix="/clients", tags=["clients"])
@@ -51,7 +52,34 @@ def get_client(cid: str, db: Session = Depends(get_db), user=Depends(require_rol
         status=c.status, segment=c.segment, notes=c.notes if user.role.value=="admin" else None)
 
 
-@router.patch("/{cid}/segment", response_model=ClientOut)
+@router.post("/auto-segment", response_model=dict)
+def auto_segment(db: Session = Depends(get_db), user=Depends(require_role("admin"))):
+    from datetime import date, timedelta
+    clients = db.query(Client).all()
+    updated = 0
+    for c in clients:
+        # last attended booking
+        last_attended = db.query(Booking).filter(Booking.client_id == c.id, Booking.status == "attended").order_by(Booking.created_at.desc()).first()
+        last_visit = last_attended.created_at if last_attended else None
+        active_sub = db.query(Subscription).filter(Subscription.client_id == c.id, Subscription.status == "active").first()
+        if not active_sub:
+            seg = "new"
+        else:
+            if active_sub.valid_until and (active_sub.valid_until - date.today()).days <= 7:
+                seg = "expiring"
+            elif active_sub.used_visits <= 2:
+                seg = "newcomer"
+            elif last_visit and (datetime.utcnow() - last_visit).days > 30:
+                seg = "sleeping"
+            elif last_visit and (datetime.utcnow() - last_visit).days > 14:
+                seg = "at_risk"
+            else:
+                seg = "active"
+        if c.segment != seg:
+            c.segment = seg
+            updated += 1
+    db.commit()
+    return {"updated": updated, "total": len(clients)}
 def update_segment(cid: str, segment: str, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
     try:
         uid = _UUID(cid)
