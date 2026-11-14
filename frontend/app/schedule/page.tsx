@@ -31,6 +31,8 @@ export default function SchedulePage() {
       }
     fetch(`${API}/api/v1/sessions?date_from=${df}&date_to=${dt}`, { headers: h }).then(r => r.json()).then((d) => {
       let list = Array.isArray(d) ? d : [];
+      const today = new Date().toISOString().slice(0,10);
+      list = list.filter((s: any) => s.date >= today);
       if (trainer) list = list.filter((s: any) => String(s.trainer_id) === trainer);
       if (classType) list = list.filter((s: any) => String(s.class_type_id) === classType);
       setSessions(list);
