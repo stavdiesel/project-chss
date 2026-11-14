@@ -73,6 +73,17 @@ class Task(Base):
     client = relationship("Client")
     assignee = relationship("User")
 
+class Waitlist(Base):
+    __tablename__ = "waitlist"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
+    client_id = Column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=False)
+    position = Column(Integer, default=1)
+    status = Column(String, default="waiting")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    session = relationship("Session")
+    client = relationship("Client")
+
 class Trainer(Base):
     __tablename__ = "trainers"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

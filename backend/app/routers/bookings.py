@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from app.core.db import get_db
 from app.core.deps import get_current_user, require_role, get_trainer
 from app.core.config import settings
-from app.models.models import Booking, BookingStatus, Session as Sess, Client, Subscription, ClassType, Trainer
+from app.models.models import Booking, BookingStatus, Session as Sess, Client, Subscription, Waitlist, ClassType, Trainer
 from app.schemas.schemas import BookingOut
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
@@ -92,6 +92,11 @@ def cancel(bid: str, db: Session = Depends(get_db), user=Depends(get_current_use
     b.status = BookingStatus.cancelled_by_admin if is_admin else BookingStatus.cancelled_by_client
     b.cancelled_at = datetime.utcnow()
     db.commit()
+    # offer waitlist spot
+    w = db.query(Waitlist).filter(Waitlist.session_id == b.session_id, Waitlist.status == "waiting").order_by(Waitlist.position).first()
+    if w:
+        w.status = "offered"
+        db.commit()
     # refund visit if subscription
     sub = db.query(Subscription).filter(Subscription.client_id == b.client_id, Subscription.status=="active").first()
     if sub and sub.used_visits > 0:

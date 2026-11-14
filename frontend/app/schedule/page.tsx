@@ -86,7 +86,12 @@ export default function SchedulePage() {
               const booked = myBookings.some(b => b.session_id === s.id && b.status === "booked");
               const full = s.booked_count >= s.capacity;
               if (booked) return <button disabled className="bg-surface-2 text-muted px-4 py-2 rounded-btn text-sm font-medium">Вы записаны</button>;
-              if (full) return <button disabled className="bg-surface-2 text-muted px-4 py-2 rounded-btn text-sm font-medium">Мест нет</button>;
+              if (full) return <button onClick={async () => {
+                const t = localStorage.getItem("token");
+                const r = await fetch(`${API}/api/v1/waitlist`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` }, body: JSON.stringify({ session_id: s.id }) });
+                setMsg(r.ok ? "Добавлено в лист ожидания" : "Ошибка (возможно, уже в списке)");
+                load();
+              }} className="bg-warn/20 text-warn px-4 py-2 rounded-btn text-sm font-medium">В лист ожидания</button>;
               return <button onClick={() => book(s.id)} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">Записаться</button>;
             })()}
           </div>

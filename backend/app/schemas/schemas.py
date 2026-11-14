@@ -171,6 +171,18 @@ class TaskCreateIn(BaseModel):
     action: Optional[str]=None
     due_date: Optional[date]=None
 
+class WaitlistOut(BaseModel):
+    id: uuid.UUID
+    session_id: uuid.UUID
+    client_id: uuid.UUID
+    position: int
+    status: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class WaitlistCreateIn(BaseModel):
+    session_id: uuid.UUID
+
 class SubscriptionCreate(BaseModel):
     client_id: uuid.UUID
     type: str = "package"
