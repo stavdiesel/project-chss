@@ -2,6 +2,15 @@
 import { useEffect, useState } from "react";
 const API = process.env.NEXT_PUBLIC_API_URL || "https://chs-backend-oc37.onrender.com";
 
+const TARIFFS = [
+  { label: "Разовое групповое занятие", type: "single_group", visits: 1, price: 1800 },
+  { label: "Разовое персональное занятие", type: "single_personal", visits: 1, price: 4000 },
+  { label: "4 групповых занятия", type: "package_4", visits: 4, price: 6600 },
+  { label: "6 групповых занятий", type: "package_6", visits: 6, price: 9300 },
+  { label: "8 групповых занятий", type: "package_8", visits: 8, price: 12000 },
+  { label: "12 групповых занятий", type: "package_12", visits: 12, price: 16800 },
+];
+
 export default function SubscriptionsPage() {
   const [subs, setSubs] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
@@ -49,6 +58,13 @@ export default function SubscriptionsPage() {
       </div>
       <div className="bg-surface border border-border rounded-card p-4 mb-6 space-y-3">
         <h2 className="text-sm font-semibold text-accent">Новый абонемент</h2>
+        <select onChange={e => {
+          const t = TARIFFS.find(x => x.label === e.target.value);
+          if (t) setForm({ ...form, type: t.type, total_visits: String(t.visits), price: String(t.price) });
+        }} className="w-full bg-surface-2 border border-border rounded-btn px-3 py-2 text-text">
+          <option value="">Выберите тариф</option>
+          {TARIFFS.map(t => <option key={t.label} value={t.label}>{t.label} — {t.price}₽</option>)}
+        </select>
         <select value={form.client_id} onChange={e => setForm({...form, client_id: e.target.value})} className="w-full bg-surface-2 border border-border rounded-btn px-3 py-2 text-text">
           <option value="">Клиент</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.first_name} {c.last_name}</option>)}
