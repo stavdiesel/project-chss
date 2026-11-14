@@ -98,7 +98,7 @@ class ScheduleCreate(BaseModel):
 
 class SessionCreate(BaseModel):
     class_type_id: uuid.UUID
-    trainer_id: uuid.UUID
+    trainer_id: Optional[uuid.UUID] = None
     date: date
     start_at: datetime
     end_at: datetime

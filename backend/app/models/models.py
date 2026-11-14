@@ -112,7 +112,7 @@ class Schedule(Base):
     __tablename__ = "schedules"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     class_type_id = Column(UUID(as_uuid=True), ForeignKey("class_types.id"), nullable=False)
-    trainer_id = Column(UUID(as_uuid=True), ForeignKey("trainers.id"), nullable=False)
+    trainer_id = Column(UUID(as_uuid=True), ForeignKey("trainers.id"), nullable=True)
     weekday = Column(Integer, nullable=False)  # 0-6
     start_time = Column(Time, nullable=False)
     end_time = Column(Time, nullable=False)
@@ -127,7 +127,7 @@ class Session(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     schedule_id = Column(UUID(as_uuid=True), ForeignKey("schedules.id"), nullable=True)
     class_type_id = Column(UUID(as_uuid=True), ForeignKey("class_types.id"), nullable=False)
-    trainer_id = Column(UUID(as_uuid=True), ForeignKey("trainers.id"), nullable=False)
+    trainer_id = Column(UUID(as_uuid=True), ForeignKey("trainers.id"), nullable=True)
     date = Column(Date, nullable=False)
     start_at = Column(DateTime, nullable=False)
     end_at = Column(DateTime, nullable=False)
