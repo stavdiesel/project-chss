@@ -166,11 +166,11 @@ export default function SchedulePage() {
               <div className="flex gap-2">
                 <button onClick={async () => {
                   const t = localStorage.getItem("token");
-                  const body = { class_type_id: createForm.class_type_id, trainer_id: createForm.trainer_id, date: createForm.date, start_at: `${createForm.date}T${createForm.start_time}:00`, end_at: `${createForm.date}T${createForm.end_time}:00`, capacity: parseInt(createForm.capacity) };
+                  const body = { class_type_id: createForm.class_type_id, trainer_id: createForm.trainer_id, date: createForm.date, start_at: `${createForm.date}T${createForm.start_time}:00`, end_at: `${createForm.date}T${createForm.end_time}:00`, capacity: parseInt(createForm.capacity) || 10 };
                   const r = await fetch(`${API}/api/v1/sessions`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` }, body: JSON.stringify(body) });
                   if (r.ok) { setMsg("Занятие создано"); setShowCreate(false); load(); }
-                  else { const d = await r.json(); setMsg(d.detail || "Ошибка"); }
-                }} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">Создать</button>
+                  else { const d = await r.json(); setMsg(d.detail || JSON.stringify(d)); }
+                }} disabled={!createForm.class_type_id || !createForm.trainer_id} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium disabled:opacity-50">Создать</button>
                 <button onClick={() => setShowCreate(false)} className="bg-surface-2 text-text px-4 py-2 rounded-btn text-sm">Отмена</button>
               </div>
             </div>
