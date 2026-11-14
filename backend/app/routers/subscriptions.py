@@ -12,7 +12,7 @@ router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 def _out(s):
     return SubscriptionOut(id=s.id, client_id=s.client_id, type=s.type, total_visits=s.total_visits,
         used_visits=s.used_visits, valid_from=s.valid_from, valid_until=s.valid_until, price=s.price,
-        status=s.status, remaining=s.total_visits-s.used_visits)
+        status=s.status, remaining=s.total_visits-s.used_visits, frozen_until=s.frozen_until)
 
 @router.get("/me", response_model=list[SubscriptionOut])
 def my_subs(db: Session = Depends(get_db), user=Depends(get_current_user)):
@@ -50,4 +50,32 @@ def create_sub(body: SubscriptionCreate, db: Session = Depends(get_db), user=Dep
         valid_from=body.valid_from, valid_until=body.valid_until, price=body.price,
         history='[{"event":"created","at":"'+__import__("datetime").datetime.utcnow().isoformat()+'"}]')
     db.add(s); db.commit(); db.refresh(s)
+    return _out(s)
+
+@router.post("/{sid}/freeze")
+def freeze_sub(sid: str, days: int = 7, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
+    try:
+        uid = _UUID(sid)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    s = db.query(Subscription).filter(Subscription.id == uid).first()
+    if not s: raise HTTPException(404)
+    from datetime import timedelta
+    s.frozen_until = (s.frozen_until or s.valid_until) + timedelta(days=days)
+    s.valid_until = s.valid_until + timedelta(days=days)
+    s.status = "frozen"
+    db.commit(); db.refresh(s)
+    return _out(s)
+
+@router.post("/{sid}/unfreeze")
+def unfreeze_sub(sid: str, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
+    try:
+        uid = _UUID(sid)
+    except (ValueError, TypeError):
+        raise HTTPException(404)
+    s = db.query(Subscription).filter(Subscription.id == uid).first()
+    if not s: raise HTTPException(404)
+    s.frozen_until = None
+    s.status = "active"
+    db.commit(); db.refresh(s)
     return _out(s)

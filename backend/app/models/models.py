@@ -160,6 +160,7 @@ class Subscription(Base):
     price = Column(Float, default=0)
     status = Column(String, default="active")
     history = Column(Text, default="[]")
+    frozen_until = Column(Date, nullable=True)
     client = relationship("Client", back_populates="subscriptions")
 
 

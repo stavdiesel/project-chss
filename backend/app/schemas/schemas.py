@@ -84,6 +84,7 @@ class SubscriptionOut(BaseModel):
     price: float
     status: str
     remaining: int = 0
+    frozen_until: Optional[date]=None
     model_config = ConfigDict(from_attributes=True)
 
 class ScheduleCreate(BaseModel):

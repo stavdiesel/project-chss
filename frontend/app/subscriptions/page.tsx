@@ -71,6 +71,7 @@ export default function SubscriptionsPage() {
             <th className="p-3 text-left text-xs text-muted">Срок</th>
             <th className="p-3 text-left text-xs text-muted">Статус</th>
             <th className="p-3 text-left text-xs text-muted">История</th>
+            <th className="p-3 text-left text-xs text-muted">Действия</th>
           </tr></thead>
           <tbody>
             {subs.map(s => {
@@ -83,6 +84,13 @@ export default function SubscriptionsPage() {
                   <td className="p-3 text-xs text-muted">{s.valid_from} → {s.valid_until}</td>
                   <td className="p-3"><span className={`text-xs px-2 py-1 rounded-btn ${s.status === "active" ? "bg-success/20 text-success" : "bg-surface-2 text-muted"}`}>{s.status}</span></td>
                   <td className="p-3"><button onClick={() => openHistory(s.id)} className="text-xs text-accent underline">История</button></td>
+                  <td className="p-3">
+                    {s.status === "frozen" ? (
+                      <button onClick={async () => { const t = localStorage.getItem("token"); const r = await fetch(`${API}/api/v1/subscriptions/${s.id}/unfreeze`, { method: "POST", headers: { Authorization: `Bearer ${t}` } }); if (r.ok) load(); }} className="text-xs bg-success/20 text-success px-2 py-1 rounded-btn">Разморозить</button>
+                    ) : (
+                      <button onClick={async () => { const t = localStorage.getItem("token"); const r = await fetch(`${API}/api/v1/subscriptions/${s.id}/freeze?days=7`, { method: "POST", headers: { Authorization: `Bearer ${t}` } }); if (r.ok) load(); }} className="text-xs bg-warn/20 text-warn px-2 py-1 rounded-btn">Заморозить</button>
+                    )}
+                  </td>
                 </tr>
               );
             })}
