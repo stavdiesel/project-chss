@@ -14,6 +14,8 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(false);
   const [myBookings, setMyBookings] = useState<any[]>([]);
   const [role, setRole] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({ class_type_id: "", trainer_id: "", date: new Date().toISOString().slice(0,10), start_time: "09:00", end_time: "10:00", capacity: "10" });
 
   const load = async () => {
     setLoading(true);
@@ -60,7 +62,10 @@ export default function SchedulePage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-semibold text-accent mb-4">Расписание</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold text-accent">Расписание</h1>
+        {role === "admin" && <button onClick={() => setShowCreate(true)} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">+ Создать занятие</button>}
+      </div>
       <div className="flex flex-wrap gap-3 mb-4 items-end">
         <div className="flex rounded-btn overflow-hidden border border-border">
           <button onClick={() => setView("day")} className={`px-3 py-1.5 text-sm ${view === "day" ? "bg-accent text-bg" : "bg-surface-2 text-muted"}`}>День</button>
@@ -139,7 +144,39 @@ export default function SchedulePage() {
             </div>
           ))
         )}
-        {!loading && sessions.length === 0 && <div className="text-muted text-sm">Нет занятий по выбранным фильтрам.</div>}
+        {showCreate && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50" onClick={() => setShowCreate(false)}>
+          <div className="bg-surface border border-border rounded-card p-6 max-w-md w-full" onClick={e => e.stopPropagation()}>
+            <h2 className="text-xl font-semibold text-accent mb-4">Новое занятие</h2>
+            <div className="space-y-3">
+              <select value={createForm.class_type_id} onChange={e => setCreateForm({...createForm, class_type_id: e.target.value})} className="w-full bg-surface-2 border border-border rounded-btn px-3 py-2 text-text">
+                <option value="">Тип занятия</option>
+                {classTypes.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <select value={createForm.trainer_id} onChange={e => setCreateForm({...createForm, trainer_id: e.target.value})} className="w-full bg-surface-2 border border-border rounded-btn px-3 py-2 text-text">
+                <option value="">Тренер</option>
+                {trainers.map((t: any) => <option key={t.id} value={t.id}>{t.first_name} {t.last_name}</option>)}
+              </select>
+              <input type="date" value={createForm.date} onChange={e => setCreateForm({...createForm, date: e.target.value})} className="w-full bg-surface-2 border border-border rounded-btn px-3 py-2 text-text" />
+              <div className="flex gap-2">
+                <input type="time" value={createForm.start_time} onChange={e => setCreateForm({...createForm, start_time: e.target.value})} className="flex-1 bg-surface-2 border border-border rounded-btn px-3 py-2 text-text" />
+                <input type="time" value={createForm.end_time} onChange={e => setCreateForm({...createForm, end_time: e.target.value})} className="flex-1 bg-surface-2 border border-border rounded-btn px-3 py-2 text-text" />
+              </div>
+              <input type="number" value={createForm.capacity} onChange={e => setCreateForm({...createForm, capacity: e.target.value})} placeholder="Вместимость" className="w-full bg-surface-2 border border-border rounded-btn px-3 py-2 text-text" />
+              <div className="flex gap-2">
+                <button onClick={async () => {
+                  const t = localStorage.getItem("token");
+                  const body = { class_type_id: createForm.class_type_id, trainer_id: createForm.trainer_id, date: createForm.date, start_at: `${createForm.date}T${createForm.start_time}:00`, end_at: `${createForm.date}T${createForm.end_time}:00`, capacity: parseInt(createForm.capacity) };
+                  const r = await fetch(`${API}/api/v1/sessions`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` }, body: JSON.stringify(body) });
+                  if (r.ok) { setMsg("Занятие создано"); setShowCreate(false); load(); }
+                  else { const d = await r.json(); setMsg(d.detail || "Ошибка"); }
+                }} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">Создать</button>
+                <button onClick={() => setShowCreate(false)} className="bg-surface-2 text-text px-4 py-2 rounded-btn text-sm">Отмена</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
