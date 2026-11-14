@@ -24,17 +24,22 @@ def get_or_create_user(email, role, name, pw="password123"):
 # admin
 admin = get_or_create_user("admin@chs.ru", Role.admin, "Администратор ЧС")
 # trainers
-t1u = get_or_create_user("trainer1@chs.ru", Role.trainer, "Мария Иванова")
-t2u = get_or_create_user("trainer2@chs.ru", Role.trainer, "Алексей Петров")
-t1 = db.query(Trainer).filter(Trainer.user_id==t1u.id).first()
-if not t1:
-    t1 = Trainer(user_id=t1u.id, first_name="Мария", last_name="Иванова", specialization="Йога, стретчинг")
-    db.add(t1)
-t2 = db.query(Trainer).filter(Trainer.user_id==t2u.id).first()
-if not t2:
-    t2 = Trainer(user_id=t2u.id, first_name="Алексей", last_name="Петров", specialization="Пилатес, аэро")
-    db.add(t2)
-db.commit(); db.refresh(t1); db.refresh(t2)
+trainers_data = [
+    ("Мария", "Петухова", "trainer1@chs.ru", "Персональный тренер, тренер групповых программ"),
+    ("Анна", "Мартынова", "trainer2@chs.ru", "Персональный тренер, тренер групповых программ"),
+    ("Виктория", "Батылина", "trainer3@chs.ru", "Персональный тренер, тренер групповых программ"),
+    ("Ирина", "Додина", "trainer4@chs.ru", "Персональный тренер, тренер групповых программ"),
+]
+trainer_objs = []
+for fn, ln, email, spec in trainers_data:
+    u = get_or_create_user(email, Role.trainer, f"{fn} {ln}")
+    t = db.query(Trainer).filter(Trainer.user_id == u.id).first()
+    if not t:
+        t = Trainer(user_id=u.id, first_name=fn, last_name=ln, specialization=spec)
+        db.add(t)
+    trainer_objs.append(t)
+db.commit()
+for t in trainer_objs: db.refresh(t)
 
 # clients
 clients_data = [("Иван","Петров","client1@chs.ru"),("Анна","Смирнова","client2@chs.ru"),("Олег","Козлов","client3@chs.ru"),("Елена","Волкова","client4@chs.ru"),("Дмитрий","Соколов","client5@chs.ru")]
@@ -63,10 +68,10 @@ for c in cts: db.refresh(c)
 
 # schedules: weekday 0-6, create for mon-fri
 import datetime as dt
-trainers=[t1,t2]
+trainers=trainer_objs
 for wd in range(5):
     for i,ct in enumerate(cts):
-        tr = trainers[i % 2]
+        tr = trainers[i % len(trainers)]
         st = dt.time(9 + i, 0)
         en = dt.time(10 + i, 0)
         sch = db.query(Schedule).filter(Schedule.class_type_id==ct.id, Schedule.trainer_id==tr.id, Schedule.weekday==wd, Schedule.start_time==st).first()
