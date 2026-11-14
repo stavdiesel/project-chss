@@ -58,6 +58,21 @@ class Lead(Base):
     responsible = relationship("User")
     client = relationship("Client")
 
+class Task(Base):
+    __tablename__ = "tasks"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    client_id = Column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=True)
+    assigned_to = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    reason = Column(String, nullable=False)
+    action = Column(String, nullable=True)
+    due_date = Column(Date, nullable=True)
+    status = Column(String, default="new")
+    history = Column(Text, default="[]")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow)
+    client = relationship("Client")
+    assignee = relationship("User")
+
 class Trainer(Base):
     __tablename__ = "trainers"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

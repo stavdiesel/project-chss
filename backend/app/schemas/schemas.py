@@ -152,6 +152,25 @@ class LeadCreateIn(BaseModel):
     next_step: Optional[str]=None
     notes: Optional[str]=None
 
+class TaskOut(BaseModel):
+    id: uuid.UUID
+    client_id: Optional[uuid.UUID]=None
+    assigned_to: Optional[uuid.UUID]=None
+    reason: str
+    action: Optional[str]=None
+    due_date: Optional[date]=None
+    status: str
+    history: Optional[str]=None
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class TaskCreateIn(BaseModel):
+    client_id: Optional[uuid.UUID]=None
+    assigned_to: Optional[uuid.UUID]=None
+    reason: str
+    action: Optional[str]=None
+    due_date: Optional[date]=None
+
 class SubscriptionCreate(BaseModel):
     client_id: uuid.UUID
     type: str = "package"
