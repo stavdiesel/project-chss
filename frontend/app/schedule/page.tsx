@@ -19,14 +19,16 @@ export default function SchedulePage() {
     setLoading(true);
     const t = localStorage.getItem("token");
     const h = { Authorization: `Bearer ${t}` };
-    let df = date, dt = date;
-    if (view === "week") {
-      const d = new Date(date);
-      const mon = new Date(d); mon.setDate(d.getDate() - d.getDay() + 1);
-      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-      df = mon.toISOString().slice(0, 10);
-      dt = sun.toISOString().slice(0, 10);
-    }
+      let df = date, dt = date;
+      if (view === "week" || view === "grid") {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        const mon = new Date(d); mon.setDate(diff);
+        const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+        df = mon.toISOString().slice(0, 10);
+        dt = sun.toISOString().slice(0, 10);
+      }
     fetch(`${API}/api/v1/sessions?date_from=${df}&date_to=${dt}`, { headers: h }).then(r => r.json()).then((d) => {
       let list = Array.isArray(d) ? d : [];
       if (trainer) list = list.filter((s: any) => String(s.trainer_id) === trainer);
@@ -79,7 +81,9 @@ export default function SchedulePage() {
         {view === "grid" ? (
           <div className="grid grid-cols-7 gap-2">
             {(() => {
-              const mon = new Date(date); mon.setDate(mon.getDate() - mon.getDay() + 1);
+              const mon = new Date(date);
+              const day = mon.getDay();
+              mon.setDate(mon.getDate() - day + (day === 0 ? -6 : 1));
               const today = new Date().toISOString().slice(0,10);
               const days = Array.from({length:7}, (_,i) => {
                 const d = new Date(mon); d.setDate(mon.getDate()+i);
