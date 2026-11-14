@@ -162,6 +162,10 @@ export default function SchedulePage() {
                 <option value="">Тип занятия</option>
                 {classTypes.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
+              <select value={createForm.trainer_id} onChange={e => setCreateForm({...createForm, trainer_id: e.target.value})} className="w-full bg-surface-2 border border-border rounded-btn px-3 py-2 text-text">
+                <option value="">Тренер (необязательно)</option>
+                {trainers.map((t: any) => <option key={t.id} value={t.id}>{t.first_name} {t.last_name}</option>)}
+              </select>
               <input type="date" value={createForm.date} onChange={e => setCreateForm({...createForm, date: e.target.value})} className="w-full bg-surface-2 border border-border rounded-btn px-3 py-2 text-text" />
               <div className="flex gap-2">
                 <input type="time" value={createForm.start_time} onChange={e => setCreateForm({...createForm, start_time: e.target.value})} className="flex-1 bg-surface-2 border border-border rounded-btn px-3 py-2 text-text" />
@@ -171,7 +175,7 @@ export default function SchedulePage() {
               <div className="flex gap-2">
                 <button onClick={async () => {
                   const t = localStorage.getItem("token");
-                  const body = { class_type_id: createForm.class_type_id, date: createForm.date, start_at: `${createForm.date}T${createForm.start_time}:00`, end_at: `${createForm.date}T${createForm.end_time}:00`, capacity: parseInt(createForm.capacity) || 10 };
+                  const body = { class_type_id: createForm.class_type_id, trainer_id: createForm.trainer_id || null, date: createForm.date, start_at: `${createForm.date}T${createForm.start_time}:00`, end_at: `${createForm.date}T${createForm.end_time}:00`, capacity: parseInt(createForm.capacity) || 10 };
                   const r = await fetch(`${API}/api/v1/sessions`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` }, body: JSON.stringify(body) });
                   if (r.ok) { setMsg("Занятие создано"); setShowCreate(false); load(); }
                   else { const d = await r.json(); setMsg(d.detail || JSON.stringify(d)); }
