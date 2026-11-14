@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 const API = process.env.NEXT_PUBLIC_API_URL || "https://chs-backend-oc37.onrender.com";
 export default function Login() {
   const [email, setEmail] = useState("client1@chs.ru");
