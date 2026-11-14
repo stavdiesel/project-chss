@@ -75,21 +75,23 @@ for wd in range(5):
             db.add(sch)
 db.commit()
 
-# generate sessions for current week (monday..sunday)
+# generate sessions for next 4 weeks
 today = dt.date.today()
 monday = today - dt.timedelta(days=today.weekday())
 schedules = db.query(Schedule).filter(Schedule.is_active==True).all()
-for sch in schedules:
-    for d in range(7):
-        day = monday + dt.timedelta(days=d)
-        if day.weekday() != sch.weekday: continue
-        exists = db.query(Sess).filter(Sess.schedule_id==sch.id, Sess.date==day).first()
-        if exists: continue
-        ct = db.query(ClassType).filter(ClassType.id==sch.class_type_id).first()
-        start = dt.datetime.combine(day, sch.start_time)
-        end = dt.datetime.combine(day, sch.end_time)
-        s = Sess(schedule_id=sch.id, class_type_id=sch.class_type_id, trainer_id=sch.trainer_id, date=day, start_at=start, end_at=end, capacity=sch.capacity)
-        db.add(s)
+for week in range(4):
+    week_monday = monday + dt.timedelta(weeks=week)
+    for sch in schedules:
+        for d in range(7):
+            day = week_monday + dt.timedelta(days=d)
+            if day.weekday() != sch.weekday: continue
+            exists = db.query(Sess).filter(Sess.schedule_id==sch.id, Sess.date==day).first()
+            if exists: continue
+            ct = db.query(ClassType).filter(ClassType.id==sch.class_type_id).first()
+            start = dt.datetime.combine(day, sch.start_time)
+            end = dt.datetime.combine(day, sch.end_time)
+            s = Sess(schedule_id=sch.id, class_type_id=sch.class_type_id, trainer_id=sch.trainer_id, date=day, start_at=start, end_at=end, capacity=sch.capacity)
+            db.add(s)
 db.commit()
 
 # subscriptions for clients
