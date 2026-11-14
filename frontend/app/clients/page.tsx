@@ -45,6 +45,7 @@ export default function ClientsPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold text-accent">Клиенты</h1>
         <button onClick={() => setShowCreate(true)} className="bg-accent text-bg px-4 py-2 rounded-btn text-sm font-medium">+ Создать</button>
+        <button onClick={() => { window.open(`${API}/api/v1/clients/export`, "_blank"); }} className="bg-surface-2 text-text px-4 py-2 rounded-btn text-sm">Экспорт CSV</button>
         <button onClick={async () => {
           const t = localStorage.getItem("token");
           const r = await fetch(`${API}/api/v1/clients/auto-segment`, { method: "POST", headers: { Authorization: `Bearer ${t}` } });

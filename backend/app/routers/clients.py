@@ -90,6 +90,20 @@ def update_segment(cid: str, segment: str, db: Session = Depends(get_db), user=D
     c.segment = segment
     db.commit(); db.refresh(c)
     return ClientOut(id=c.id, first_name=c.first_name, last_name=c.last_name, phone=c.phone, email=c.email, status=c.status, segment=c.segment, notes=c.notes)
+@router.get("/export")
+def export_clients(db: Session = Depends(get_db), user=Depends(require_role("admin"))):
+    import csv, io
+    from fastapi.responses import StreamingResponse
+    rows = db.query(Client).all()
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["id","first_name","last_name","phone","email","status","segment","notes"])
+    for c in rows:
+        w.writerow([c.id, c.first_name, c.last_name, c.phone, c.email, c.status, c.segment, c.notes])
+    buf.seek(0)
+    return StreamingResponse(iter([buf.getvalue()]), media_type="text/csv", headers={"Content-Disposition": "attachment; filename=clients.csv"})
+
+@router.post("", response_model=ClientOut)
 def create_client(body: ClientCreateIn, db: Session = Depends(get_db), user=Depends(require_role("admin"))):
     u = User(email=body.email, password_hash=hash_password("password123"), role=Role.client, full_name=f"{body.first_name} {body.last_name}")
     db.add(u); db.commit(); db.refresh(u)
