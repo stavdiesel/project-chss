@@ -50,7 +50,7 @@ class SessionOut(BaseModel):
     id: uuid.UUID
     class_type_id: uuid.UUID
     class_type_name: Optional[str]=None
-    trainer_id: uuid.UUID
+    trainer_id: Optional[uuid.UUID]=None
     trainer_name: Optional[str]=None
     date: date
     start_at: datetime
