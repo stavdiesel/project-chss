@@ -33,6 +33,7 @@ class Client(Base):
     email = Column(String)
     notes = Column(Text)
     status = Column(String, default="active")
+    segment = Column(String, default="new")
     user = relationship("User", back_populates="client_profile")
     subscriptions = relationship("Subscription", back_populates="client")
     bookings = relationship("Booking", back_populates="client")

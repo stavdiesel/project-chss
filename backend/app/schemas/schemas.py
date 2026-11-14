@@ -27,6 +27,7 @@ class ClientOut(BaseModel):
     phone: Optional[str]=None
     email: Optional[str]=None
     status: str
+    segment: Optional[str]=None
     notes: Optional[str]=None
     model_config = ConfigDict(from_attributes=True)
 

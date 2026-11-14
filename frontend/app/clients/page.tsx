@@ -6,6 +6,7 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<any[]>([]);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
+  const [segment, setSegment] = useState("");
   const [selected, setSelected] = useState<any>(null);
   const [subs, setSubs] = useState<any[]>([]);
   const [showCreate, setShowCreate] = useState(false);
@@ -22,6 +23,7 @@ export default function ClientsPage() {
     const hay = `${c.first_name} ${c.last_name} ${c.email || ""} ${c.phone || ""}`.toLowerCase();
     if (q && !hay.includes(q.toLowerCase())) return false;
     if (status && c.status !== status) return false;
+    if (segment && c.segment !== segment) return false;
     return true;
   });
 
@@ -52,6 +54,16 @@ export default function ClientsPage() {
           <option value="active">Активен</option>
           <option value="inactive">Неактивен</option>
         </select>
+        <select value={segment} onChange={e => setSegment(e.target.value)} className="bg-surface-2 border border-border rounded-btn px-3 py-2 text-text">
+          <option value="">Все сегменты</option>
+          <option value="new">Новый лид</option>
+          <option value="newcomer">Новичок</option>
+          <option value="active">Активный</option>
+          <option value="expiring">Заканчивается</option>
+          <option value="at_risk">Зона потери</option>
+          <option value="sleeping">Спящий</option>
+          <option value="declined">Отказался</option>
+        </select>
       </div>
 
       <div className="hidden md:block bg-surface border border-border rounded-card overflow-hidden">
@@ -61,6 +73,7 @@ export default function ClientsPage() {
             <th className="p-3 text-left text-xs text-muted">Email</th>
             <th className="p-3 text-left text-xs text-muted">Телефон</th>
             <th className="p-3 text-left text-xs text-muted">Статус</th>
+            <th className="p-3 text-left text-xs text-muted">Сегмент</th>
           </tr></thead>
           <tbody>
             {filtered.map(c => (
@@ -69,6 +82,7 @@ export default function ClientsPage() {
                 <td className="p-3 text-muted">{c.email || "—"}</td>
                 <td className="p-3 text-muted">{c.phone || "—"}</td>
                 <td className="p-3"><span className={`text-xs px-2 py-1 rounded-btn ${c.status === "active" ? "bg-success/20 text-success" : "bg-warn/20 text-warn"}`}>{c.status}</span></td>
+                <td className="p-3 text-xs text-muted">{c.segment || "—"}</td>
               </tr>
             ))}
           </tbody>
@@ -97,6 +111,21 @@ export default function ClientsPage() {
               <div><span className="text-muted">Email:</span> {selected.email || "—"}</div>
               <div><span className="text-muted">Телефон:</span> {selected.phone || "—"}</div>
               <div><span className="text-muted">Статус:</span> {selected.status}</div>
+              <div><span className="text-muted">Сегмент:</span> {selected.segment || "—"}
+                <select value={selected.segment || ""} onChange={async e => {
+                  const t = localStorage.getItem("token");
+                  const r = await fetch(`${API}/api/v1/clients/${selected.id}/segment?segment=${e.target.value}`, { method: "PATCH", headers: { Authorization: `Bearer ${t}` } });
+                  if (r.ok) { const d = await r.json(); setSelected(d); load(); }
+                }} className="ml-2 bg-surface-2 border border-border rounded-btn px-2 py-1 text-xs">
+                  <option value="new">Новый лид</option>
+                  <option value="newcomer">Новичок</option>
+                  <option value="active">Активный</option>
+                  <option value="expiring">Заканчивается</option>
+                  <option value="at_risk">Зона потери</option>
+                  <option value="sleeping">Спящий</option>
+                  <option value="declined">Отказался</option>
+                </select>
+              </div>
               {selected.notes && <div><span className="text-muted">Заметки:</span> {selected.notes}</div>}
             </div>
             <h3 className="text-sm font-semibold text-accent mb-2">Абонементы</h3>

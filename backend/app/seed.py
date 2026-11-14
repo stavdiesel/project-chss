@@ -5,6 +5,13 @@ from app.models.models import (User, Role, Client, Trainer, ClassType, Schedule,
 import uuid
 
 Base.metadata.create_all(bind=engine)
+# migrate: add segment column if missing
+try:
+    with engine.connect() as conn:
+        conn.execute(__import__("sqlalchemy").text("ALTER TABLE clients ADD COLUMN IF NOT EXISTS segment VARCHAR DEFAULT 'new'"))
+        conn.commit()
+except Exception as e:
+    print("migrate segment:", e)
 db = SessionLocal()
 
 def get_or_create_user(email, role, name, pw="password123"):
