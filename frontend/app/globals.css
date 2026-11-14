@@ -20,6 +20,22 @@
   --radius-btn: 12px;
 }
 
+.light {
+  --bg: #F7F7F5;
+  --surface: #FFFFFF;
+  --surface-2: #F0F0EE;
+  --text: #1A1A1A;
+  --muted: #6B6B6B;
+  --accent: #19B6A3;
+  --berry: #C34B83;
+  --blue: #397BE5;
+  --terra: #C85A3E;
+  --success: #19B6A3;
+  --warn: #E8A838;
+  --danger: #E24B4A;
+  --border: #E0E0DD;
+}
+
 body {
   background: var(--bg);
   color: var(--text);

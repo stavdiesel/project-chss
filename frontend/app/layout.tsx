@@ -30,15 +30,29 @@ const NAV_CLIENT = [
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<string>("");
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const pathname = usePathname();
-  useEffect(() => { setRole(localStorage.getItem("role") || ""); }, [pathname]);
+  useEffect(() => {
+    setRole(localStorage.getItem("role") || "");
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") {
+      setTheme(saved);
+    } else {
+      const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+      setTheme(prefersLight ? "light" : "dark");
+    }
+  }, [pathname]);
+  useEffect(() => {
+    document.documentElement.classList.toggle("light", theme === "light");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
   const nav = role === "admin" ? NAV_ADMIN : role === "trainer" ? NAV_TRAINER : NAV_CLIENT;
   const isLogin = pathname === "/";
   if (isLogin) {
-    return <html lang="ru"><body>{children}</body></html>;
+    return <html lang="ru" className={theme === "light" ? "light" : ""}><body>{children}</body></html>;
   }
   return (
-    <html lang="ru"><body>
+    <html lang="ru" className={theme === "light" ? "light" : ""}><body>
       <div className="min-h-screen flex">
         <aside className="sidebar w-60 shrink-0 border-r border-border bg-surface hidden md:flex flex-col">
           <div className="p-5 text-xl font-semibold text-accent">ЧСС · Студия</div>
@@ -47,7 +61,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link key={n.href} href={n.href} className={`block px-3 py-2 rounded-btn text-sm ${pathname===n.href ? "bg-surface-2 text-accent" : "text-muted hover:text-text hover:bg-surface-2"}`}>{n.label}</Link>
             ))}
           </nav>
-          <div className="p-3 border-t border-border">
+          <div className="p-3 border-t border-border space-y-2">
+            <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="w-full text-left px-3 py-2 rounded-btn text-sm text-muted hover:text-text hover:bg-surface-2">
+              {theme === "dark" ? "☀️ Светлая тема" : "🌙 Тёмная тема"}
+            </button>
             <button onClick={() => { localStorage.clear(); window.location.href = "/"; }} className="w-full text-left px-3 py-2 rounded-btn text-sm text-muted hover:text-text hover:bg-surface-2">Выйти</button>
           </div>
         </aside>
@@ -55,7 +72,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header className="h-14 border-b border-border bg-surface flex items-center px-4 md:px-6">
             <div className="md:hidden text-accent font-semibold mr-3">ЧСС</div>
             <div className="text-sm text-muted truncate">{pathname}</div>
-            <div className="ml-auto text-xs text-muted">{role}</div>
+            <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="ml-auto mr-3 text-xs text-muted hover:text-text">{theme === "dark" ? "☀️" : "🌙"}</button>
+            <div className="text-xs text-muted">{role}</div>
           </header>
           <main className="flex-1 overflow-auto">{children}</main>
           <nav className="md:hidden border-t border-border bg-surface flex overflow-x-auto">
